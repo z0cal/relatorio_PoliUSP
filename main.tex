@@ -1,0 +1,76 @@
+\documentclass[a4paper,12pt,twoside]{article}
+
+\usepackage{poliusp} % Onde você colou o código acima
+\usepackage{amsmath,amssymb}
+% Apenas preencha os dados aqui:
+\titulo{Relatório de Sistemas Digitais}
+\subtitulo{Laboratório 4: Simulação do Processador LEGv8}
+\Autores{Nome do Aluno - NUSP XXXXXXX}
+\departamento{Departamento de Computação e Sistemas Digitais}
+\data{\today}
+
+
+\begin{document}
+% A CAPA APARECERÁ AUTOMATICAMENTE AQUI
+\tableofcontents 
+\clearpage
+
+\section{Seção com Matemática}
+
+Texto com matemática inline: $e^{i\pi}+1=0$, $\alpha+\beta=\gamma$ e $x^2+y^2=z^2$.
+
+\subsection{Ambiente equation}
+
+\begin{equation}
+  \int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}.
+\end{equation}
+
+\subsection{Ambiente align}
+
+\begin{align}
+  (a+b)^2 &= a^2 + 2ab + b^2, \\
+  (a-b)^2 &= a^2 - 2ab + b^2.
+\end{align}
+
+\section{Seção com Casos e Matrizes}
+
+\subsection{Função definida por partes}
+
+\begin{equation}
+  f(x) =
+  \begin{cases}
+    x^2, & x \ge 0,\\
+    -x,  & x < 0.
+  \end{cases}
+\end{equation}
+
+\newpage
+
+\subsection{Matriz e vetor}
+
+\[
+A =
+\begin{pmatrix}
+1 & 2 & 3\\
+0 & 1 & 4\\
+0 & 0 & 1
+\end{pmatrix},
+\qquad
+b =
+\begin{pmatrix}
+1\\
+0\\
+-1
+\end{pmatrix}.
+\]
+
+\section{Seção com Símbolos e Notação}
+
+Texto com símbolos: $\forall x \in \mathbb{R}$, $\exists y>0$ tal que $|x|<y$ e
+$\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
+
+\[
+\lim_{n\to\infty}\left(1+\frac{1}{n}\right)^n = e.
+\]
+
+\end{document}

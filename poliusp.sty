@@ -1,0 +1,225 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{poliusp}[2026/02/05 Template Poli USP v1.1]
+
+% --- 1. PACOTES ---
+\RequirePackage{graphicx}
+\RequirePackage{eso-pic}
+\RequirePackage{transparent}
+\RequirePackage{xcolor}
+\RequirePackage{ifthen}
+\RequirePackage{fontspec}
+\RequirePackage{iftex}
+\RequirePackage{eulervm}
+\RequirePackage[pagestyles]{titlesec}
+\usepackage[
+  top=26mm,
+  headheight=14mm,
+  headsep=10mm
+]{geometry}
+\RequirePackage[
+    colorlinks=true,      % Ativa cores nos links (false para box em volta)
+    linkcolor=azulpoli,   % Cor dos links internos (Sumário, Figuras)
+    citecolor=azulpoli,   % Cor das citações bibliográficas
+    urlcolor=azulpoli,    % Cor dos links de internet
+    pdfdisplaydoctitle=true, % Mostra o título na barra da janela
+    bookmarksnumbered=true   % Numera os bookmarks no PDF
+]{hyperref}
+
+% --- 2. CORES E FONTES ---
+\definecolor{azulpoli}{cmyk}{1.0, 0.72, 0.0, 0.18}
+% Fonte Copperplate (ajuste o Path se necessário)
+\newfontfamily\fonteCapa[
+  Path = ./fontes/,
+  UprightFont = {copperplate_gothic_bt.ttf},
+  BoldFont    = {CopperplateGothicBT-Bold.otf}
+]{Copperplate Gothic BT}
+
+% --- 3. INICIALIZAÇÃO DE VARIÁVEIS ---
+\newcommand{\poliTituloSalvo}{Titulo do Relatorio}
+\newcommand{\poliTituloCurtoSalvo}{Titulo Curto}
+\newcommand{\poliSubtituloSalvo}{}
+\newcommand{\poliAutorSalvo}{Nome do Autor}
+\newcommand{\poliDataSalva}{\today}
+\newboolean{temSubtitulo}\setboolean{temSubtitulo}{false}
+
+\newcommand{\titulo}[2][]{
+    \renewcommand{\poliTituloSalvo}{#2}
+    \ifthenelse{\equal{#1}{}}{
+        \renewcommand{\poliTituloCurtoSalvo}{#2}
+    }{
+        \renewcommand{\poliTituloCurtoSalvo}{#1}
+    }
+}
+% =========================
+% Departamento (metadado)
+% =========================
+\newcommand{\poliDepartamentoSalvo}{} % valor padrão vazio
+
+\newcommand{\departamento}[1]{%
+  \renewcommand{\poliDepartamentoSalvo}{#1}%
+}
+
+\newcommand{\subtitulo}[1]{
+    \renewcommand{\poliSubtituloSalvo}{#1}
+    \setboolean{temSubtitulo}{true}
+}
+\newlength{\poliAutoresAltura}
+\setlength{\poliAutoresAltura}{5\baselineskip}
+
+\newcommand{\poliAutoresLista}{}
+\newcommand{\Autores}[1]{\renewcommand{\poliAutoresLista}{#1}}
+
+\newcommand{\poliBlocoAutores}{%
+  \begin{minipage}[t][\poliAutoresAltura][t]{\textwidth}
+    \centering
+    \large
+    \poliAutoresLista
+  \end{minipage}%
+}
+
+%\newcommand{\autor}[1]{\renewcommand{\poliAutorSalvo}{#1}}
+\newcommand{\data}[1]{\renewcommand{\poliDataSalva}{#1}}
+
+% --- 4. IMAGENS (Sem Underscores nos nomes!) ---
+% IMPORTANTE: Renomeie o arquivo na pasta para 'logorobusto.pdf'
+\newcommand{\poliBrasao}{logospoli/logorobusto} 
+\newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge} % Nome do arquivo PDF
+% Nome seguro para a barra da USP
+\newcommand{\poliBarraLogo}{logospoli/usp+polibarra} 
+\newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
+\newcommand{\MarcaAguaCapa}{%
+  \AddToShipoutPictureBG*{%
+    \AtPageCenter{%
+      \put(-5mm,20mm){\makebox(0,0){%
+        {\transparent{0.15}\includegraphics[width=0.5\paperwidth,keepaspectratio]{\poliBrasao}}%
+      }}%
+    }%
+  }%
+}
+
+% --- 5. LAYOUT DA CAPA (VERSÃO ESTÁTICA/TRAVADA) ---
+\renewcommand{\maketitle}{
+  \begin{titlepage}
+    \MarcaAguaCapa
+    \centering
+    
+    % 1. CABEÇALHO (Fixo via eso-pic, não empurra o texto)
+    \AddToShipoutPictureBG*{
+      \AtPageUpperLeft{
+        \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-2cm}){
+          \makebox(0,0)[t]{
+            \begin{tabular}{c}
+              \includegraphics[width=16cm]{\poliImgCabecalho} \\
+              \fonteCapa  \poliDepartamentoSalvo
+            \end{tabular}
+          }
+        }
+      }
+    }
+
+    % =========================================================
+    % 2. BLOCO DO TÍTULO (Altura fixa: 6cm)
+    % O \vspace* empurra o início do conteúdo para baixo do cabeçalho
+    % =========================================================
+    \vspace*{3.5cm} 
+    
+    \begin{minipage}[t][12cm][c]{\textwidth}
+        \centering
+        {\huge \fonteCapa \bfseries \color{azulpoli} \poliTituloSalvo \par}
+        
+        \ifthenelse{\boolean{temSubtitulo}}{
+            \vspace{1cm}
+            {\Large \color{azulpoli} \textbf{\poliSubtituloSalvo} \par}
+        }{}
+    \end{minipage}
+
+    % Espaço fixo entre o bloco do título e o bloco dos autores
+    \vspace{2cm}
+
+    % =========================================================
+    % 3. BLOCO DOS AUTORES (Altura fixa total incluindo linhas)
+    % =========================================================
+    
+    % Linha superior
+    \includegraphics{\poliFilet}
+    
+    \vspace{0.2cm} % Espacinho respiro
+    
+    % A minipage dos autores já tem 5cm fixos definidos na sua variável \poliAutoresAltura
+    \poliBlocoAutores
+    
+    \vspace{0.2cm} % Espacinho respiro
+    
+    % Linha inferior
+    \includegraphics{\poliFilet}
+
+    % =========================================================
+    % 4. DATA (Empurrada para o final)
+    % =========================================================
+    \vfill
+    {\large \poliDataSalva \par}
+    % Ajuste fino se a data ficar muito colada na margem inferior
+    
+  \end{titlepage}
+  \clearpage
+}
+\newlength{\alturaLogoHeader}
+\setlength{\alturaLogoHeader}{10mm} % adjust: 8mm, 12mm, ...
+
+% --- Blocos do cabeçalho ---
+\newcommand{\poliHeaderTitulo}{%
+  \fonteCapa\color{azulpoli}\poliTituloCurtoSalvo%
+}
+
+\newcommand{\poliHeaderLogo}{%
+  \includegraphics[height=\alturaLogoHeader]{\poliBarraLogo}%
+}
+
+% --- Estilo de página com cabeçalho alternado (pares/ímpares) ---
+% --- Estilo de página com cabeçalho alternado (pares/ímpares) ---
+\newpagestyle{poliusp}{
+  % Sintaxe: \sethead[par-esq][par-centro][par-dir]{impar-esq}{impar-centro}{impar-dir}
+  \sethead[\poliHeaderLogo][][\poliHeaderTitulo] % Páginas Pares
+          {\poliHeaderTitulo}{}{\poliHeaderLogo} % Páginas Ímpares
+
+  \headrule
+
+% Rodapé: número centralizado em todas as páginas
+\setfoot[][\fonteCapa\color{azulpoli}\thepage][] % páginas pares: centro
+        {}{\fonteCapa\color{azulpoli}\thepage}{} % páginas ímpares: centro
+ % Direita em páginas ímpares
+}
+% Seções centralizadas, sem cor
+\titleformat{\section}
+  {\centering\fonteCapa\bfseries\Large} % formato
+  {\thesection}{0.8em}{}                % número + espaçamento + título
+
+% Subseções à esquerda, com fonte mais fina
+\titleformat{\subsection}
+  {\raggedright\fonteCapa\mdseries\large}
+  {\thesubsection}{0.8em}{}
+
+
+% (Opcional) Espaçamentos verticais mais "polidos"
+\titlespacing*{\section}{0pt}{2.5ex plus 0.8ex minus 0.4ex}{1.2ex}
+\titlespacing*{\subsection}{0pt}{2.0ex plus 0.6ex minus 0.3ex}{0.8ex}
+
+% 1. Traduz o nome para Português
+\renewcommand{\contentsname}{Sumário}
+
+% 2. Formatação da Seção Numerada (Você já tem isso, mantenha)
+\titleformat{\section}
+  {\centering\fonteCapa\bfseries\Large}
+  {\thesection}{0.8em}{}
+
+% 3. NOVO: Formatação da Seção SEM Número (Sumário, Referências)
+% O parametro "numberless" aplica o estilo para seções com *
+\titleformat{name=\section,numberless}
+  {\centering\fonteCapa\bfseries\Large} % Mesmo estilo da normal
+  {}{0em}{}
+
+% --- 7. ATIVAÇÃO ---
+\AtBeginDocument{
+  \maketitle
+  \pagestyle{poliusp}
+}
