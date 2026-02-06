@@ -74,7 +74,12 @@ $\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
 \[
 \lim_{n\to\infty}\left(1+\frac{1}{n}\right)^n = e.
 \]
-\tabelaSimulacao{Cenário \#1 -- Acerto das 16 jogadas (Simulação)}{tab:cenario1}{
+%exemplos de atalho para tabelas, foi pensando para uso pessoal, por isso a escolhas b
+% Parâmetros: #1=Legenda, #2=Label, #3=Conteúdo das linhas
+\tabelaSimulacao
+{Cenário 1 -- Acerto das 16 jogadas (Simulação)}
+{tab:cenario1}
+{
     1  & Resetar circuito & \texttt{reset\_in = 1} & FSM no estado inicial & \\
     2  & Aguardar estabilidade & - & - & \\
     3  & Acionar iniciar & \texttt{iniciar\_in = 1} & Aguardando jogada 1 & Aguardando jogada 1 \\
@@ -82,7 +87,9 @@ $\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
     19 & Acionar jogada 16 & \texttt{chaves = 4'b0100} & 
     \begin{tabular}[c]{@{}l@{}}Sinais \textbf{acertou} e \\ \textbf{pronto} ativados\end{tabular} & \\
 }
-\tabelaDuasColunas
+
+% \tabelaDuasColunas{<caption>}{<label>}{<coluna 1>}{<coluna 2>}{<linhas>}
+\tabeladuas
   {Resumo de parâmetros do experimento}
   {tab:parametros}
   {Parâmetro}
@@ -93,7 +100,8 @@ $\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
     Ambiente & Simulação (Icarus/GTKWave) \\
   }
 
-\tabelaTresColunas
+% \tabelaTresColunas{<caption>}{<label>}{<col1>}{<col2>}{<col3>}{<linhas>}
+\tabelatres
   {Resumo do experimento}
   {tab:resumo-exp}
   {Item}
