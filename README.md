@@ -21,26 +21,27 @@ Este repositório contém um template LaTeX (estilo/capa/cabeçalho) para docume
 No Arch Linux:
 ```bash
 sudo pacman -S texlive latexmk
+```
 ### 2) Compilar o PDF
 
 Na raiz do repositório, execute:
 
 ```bash
 make
-
+```
 Para recompilar automaticamente toda vez que mudar o main.tex
 
 ```bash
 make watch
-
+```
 Para remover a pasta build
 
 ```bash
 make clean
-
+```
 Para remover os arquivos auxiliares
 
 ```bash
 make distclean
-
+```
 
