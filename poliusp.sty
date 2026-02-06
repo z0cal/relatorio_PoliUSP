@@ -9,9 +9,13 @@
 \RequirePackage{ifthen}
 \RequirePackage{fontspec}
 \RequirePackage{iftex}
+\RequirePackage{booktabs} 
+\RequirePackage{float}    
+\RequirePackage{graphicx} 
+\RequirePackage{picture} 
 \RequirePackage{eulervm}
 \RequirePackage[pagestyles]{titlesec}
-\usepackage[
+\RequirePackage[
   top=26mm,
   headheight=14mm,
   headsep=10mm
@@ -80,6 +84,59 @@
 %\newcommand{\autor}[1]{\renewcommand{\poliAutorSalvo}{#1}}
 \newcommand{\data}[1]{\renewcommand{\poliDataSalva}{#1}}
 
+% --- Comando para Tabela de Simulação (Modelo LEGv8) ---
+% Parâmetros: #1=Legenda, #2=Label, #3=Conteúdo das linhas
+% --- Comando para Tabela de Simulação (Modelo LEGv8) ---
+% Parâmetros: #1=Legenda, #2=Label, #3=Conteúdo das linhas
+\newcommand{\tabelaSimulacao}[3]{%
+  \begin{table}[H]
+    \centering
+    \caption{#1}
+    \label{#2}
+    \resizebox{\textwidth}{!}{%
+      \begin{tabular}{cllcc}
+        \toprule
+        \textbf{ (Caso)} & \textbf{Operação} & \textbf{Sinais de entrada} &
+        \textbf{Resultado esperado} & \textbf{Resultado observado} \\
+        \midrule
+        #3
+        \bottomrule
+      \end{tabular}%
+    }%
+  \end{table}%
+}
+% \tabelaDuasColunas{<caption>}{<label>}{<coluna 1>}{<coluna 2>}{<linhas>}
+\newcommand{\tabelaDuasColunas}[5]{%
+  \begin{table}[H]
+    \centering
+    \caption{#1}
+    \label{#2}
+    \begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+      \toprule
+      \textbf{#3} & \textbf{#4} \\
+      \midrule
+      #5
+      \bottomrule
+    \end{tabular}
+  \end{table}%
+}
+% \tabelaTresColunas{<caption>}{<label>}{<col1>}{<col2>}{<col3>}{<linhas>}
+\newcommand{\tabelaTresColunas}[6]{%
+  \begin{table}[H]
+    \centering
+    \caption{#1}
+    \label{#2}
+    \begin{tabular}{p{0.30\textwidth} p{0.30\textwidth} p{0.30\textwidth}}
+      \toprule
+      \textbf{#3} & \textbf{#4} & \textbf{#5} \\
+      \midrule
+      #6
+      \bottomrule
+    \end{tabular}
+  \end{table}%
+}
+
+
 % --- 4. IMAGENS (Sem Underscores nos nomes!) ---
 % IMPORTANTE: Renomeie o arquivo na pasta para 'logorobusto.pdf'
 \newcommand{\poliBrasao}{logospoli/logorobusto} 
@@ -90,8 +147,8 @@
 \newcommand{\MarcaAguaCapa}{%
   \AddToShipoutPictureBG*{%
     \AtPageCenter{%
-      \put(-5mm,20mm){\makebox(0,0){%
-        {\transparent{0.15}\includegraphics[width=0.5\paperwidth,keepaspectratio]{\poliBrasao}}%
+      \put(0,20mm){\makebox(0,0){%
+        {\transparent{0.1}\includegraphics[width=0.5\paperwidth,keepaspectratio]{\poliBrasao}}%
       }}%
     }%
   }%
