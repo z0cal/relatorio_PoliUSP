@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt,twoside]{article}
 
-\usepackage{poliusp} % Onde você colou o código acima
+\usepackage[brazil]{babel}
+\usepackage{poliusp} 
 \usepackage{amsmath,amssymb}
 % Apenas preencha os dados aqui:
 \titulo{Relatório de Sistemas Digitais}
@@ -68,12 +69,18 @@ b =
 
 \section{Seção com Símbolos,Notação e Tabela}
 
+%gera uma caixa pequena de sumario das subsection da section atual
+\gerarSumarioLocal
+
 Texto com símbolos: $\forall x \in \mathbb{R}$, $\exists y>0$ tal que $|x|<y$ e
 $\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
 
 \[
 \lim_{n\to\infty}\left(1+\frac{1}{n}\right)^n = e.
 \]
+
+\subsection{Tabela de Simulação labdig}
+
 %exemplos de atalho para tabelas, foi pensando para uso pessoal, por isso a escolhas b
 % Parâmetros: #1=Legenda, #2=Label, #3=Conteúdo das linhas
 \tabelaSimulacao
@@ -87,6 +94,7 @@ $\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
     19 & Acionar jogada 16 & \texttt{chaves = 4'b0100} & 
     \begin{tabular}[c]{@{}l@{}}Sinais \textbf{acertou} e \\ \textbf{pronto} ativados\end{tabular} & \\
 }
+\subsection{tabela de Duas Colunas}
 
 % \tabelaDuasColunas{<caption>}{<label>}{<coluna 1>}{<coluna 2>}{<linhas>}
 \tabeladuas
@@ -99,6 +107,8 @@ $\sum_{k=0}^{n} k = \frac{n(n+1)}{2}$.
     Nº de testes & 16 \\
     Ambiente & Simulação (Icarus/GTKWave) \\
   }
+
+  \subsection{Tabela de Tres colunas}
 
 % \tabelaTresColunas{<caption>}{<label>}{<col1>}{<col2>}{<col3>}{<linhas>}
 \tabelatres
