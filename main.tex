@@ -3,10 +3,18 @@
 \usepackage[brazil]{babel}
 \usepackage{poliusp} 
 \usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{tikzmark,calc, shapes, backgrounds,arrows.meta, positioning}
+
 % Apenas preencha os dados aqui:
 \titulo{Relatório de Sistemas Digitais}
-\subtitulo{Laboratório 4: Simulação do Processador LEGv8}
-\Autores{Nome do Aluno - NUSP XXXXXXX}
+\subtitulo{Simulação do Processador LEGv8}
+\Autores{
+        Nome do Aluno - NUSP XXXXXXX\\
+        Nome do Aluno - NUSP XXXXXXX\\
+        Nome do Aluno - NUSP XXXXXXX\\
+        Nome do Aluno - NUSP XXXXXXX
+        }
 \departamento{Departamento de Computação e Sistemas Digitais}
 \data{\today}
 
@@ -44,6 +52,141 @@ Texto com matemática inline: $e^{i\pi}+1=0$, $\alpha+\beta=\gamma$ e $x^2+y^2=z
     -x,  & x < 0.
   \end{cases}
 \end{equation}
+
+\section{Tikz}
+  \subsection{Daigrama comutativo}
+    \begin{center}
+    \begin{tikzpicture}[node distance=3.0cm, auto]
+        % --- Definição dos Nós ---
+        
+        % 1. TOPO: O anel de polinômios "pai" (Abstrato)
+        \node (Poly) {$\mathbb{Z}_p[x]$};
+        
+        % 2. DIREITA: Domínio da Frequência (Valores pontuais)
+        % Aqui o \bigoplus mostra que são valores independentes
+        \node (Freq) [right of=Poly, node distance=7cm] 
+                     {$\displaystyle \bigoplus_{k=0}^{N-1} \mathbb{Z}_p$};
+        
+        % 3. BAIXO: Domínio do Tempo (Anel Negacíclico Compacto)
+        % O ideal gerador é o polinômio completo
+        \node (Time) [below of=Poly] {$\mathbb{Z}_p[x]/( x^N+1 )$};
+
+        % --- As Setas ---
+        
+        % Seta Horizontal: Avaliação Múltipla
+        % Quebrei a linha no label para não alargar demais o diagrama
+        \draw[->] (Poly) -- node[align=center, above, font=\footnotesize] {\color{white}$x \mapsto(\psi^{2k+1})_{k=0}^{N-1} $} 
+                            (Freq);
+        
+        % Seta Vertical: Projeção Canônica
+        \draw[->>] (Poly) -- node[left] {\color{white}$\pi$} (Time);
+        
+        % Seta Diagonal: A NTT (Isomorfismo CRT)
+        % Aqui mostramos que sair do anel compacto e ir para a soma direta é a NTT
+        \draw[->, dashed, thick,] (Time) -- node[sloped, above] {$\mathbf{}$} 
+                                           node[sloped, below] {\color{white}$\cong$} 
+                                           (Freq);
+    \end{tikzpicture}
+    \end{center}
+
+    \subsection{Borboleta}
+    \begin{center}
+    \begin{tikzpicture}[
+        >=Stealth, 
+        node distance=1.5cm, 
+        thick,
+        scale=0.75, transform shape, % Ajuste de escala para caber no slide
+        op/.style={circle, draw, minimum size=0.6cm, inner sep=0pt, font=\large},
+        input/.style={font=\Large},
+        twiddle/.style={font=\normalsize, above, midway}
+    ]
+
+        % --- Coordenadas Verticais das Linhas ---
+        \coordinate (L0) at (0, 0);
+        \coordinate (L1) at (0, -2);
+        \coordinate (L2) at (0, -4);
+        \coordinate (L3) at (0, -6);
+
+        % --- Entradas (Ordem Natural) ---
+        \node[input] (in0) at (L0) {$x[0]$};
+        \node[input] (in1) at (L1) {$x[1]$};
+        \node[input] (in2) at (L2) {$x[2]$};
+        \node[input] (in3) at (L3) {$x[3]$};
+
+        % ==================================================
+        % ESTÁGIO 1: Borboletas de Stride 2
+        % ==================================================
+
+        % --- Par 1 (Linhas 0 e 2) ---
+        \node[op] (plus1_0) at (4, 0) {$+$};
+        \node[op] (minus1_2) at (4, -4) {$-$};
+        \node[op] (times1_2) at (1.5, -4) {$\times$};
+        \node (psi1) at (1.5, -5) {$\psi^2$}; 
+
+        \draw[->] (in0) -- (plus1_0);
+        \draw[->] (in0) -- (minus1_2);
+        \draw[->] (in2) -- (times1_2);
+        \draw[->] (psi1) -- (times1_2);
+        \draw[->] (times1_2) -- (minus1_2);
+        \draw[->] (times1_2) -- (plus1_0);
+
+        % --- Par 2 (Linhas 1 e 3) ---
+        \node[op] (plus1_1) at (4, -2) {$+$};
+        \node[op] (minus1_3) at (4, -6) {$-$};
+        \node[op] (times1_3) at (1.5, -6) {$\times$};
+        \node (psi2) at (1.5, -7) {$\psi^2$};
+
+        \draw[->] (in1) -- (plus1_1);
+        \draw[->] (in1) -- (minus1_3);
+        \draw[->] (in3) -- (times1_3);
+        \draw[->] (psi2) -- (times1_3);
+        \draw[->] (times1_3) -- (minus1_3);
+        \draw[->] (times1_3) -- (plus1_1);
+
+        % ==================================================
+        % ESTÁGIO 2: Borboletas de Stride 1
+        % ==================================================
+
+        % --- Topo (Resultados 0 e 1) ---
+        \node[op] (plus2_0) at (8, 0) {$+$};
+        \node[op] (minus2_1) at (8, -2) {$-$};
+        \node[op] (times2_1) at (6, -2) {$\times$};
+        \node (psi3) at (6, -3) {$\psi^1$}; 
+
+        \draw[->] (plus1_0) -- (plus2_0);
+        \draw[->] (plus1_0) -- (minus2_1);
+        \draw[->] (plus1_1) -- (times2_1);
+        \draw[->] (psi3) -- (times2_1);
+        \draw[->] (times2_1) -- (minus2_1);
+        \draw[->] (times2_1) -- (plus2_0);
+
+        % --- Fundo (Resultados 2 e 3) ---
+        \node[op] (plus2_2) at (8, -4) {$+$};
+        \node[op] (minus2_3) at (8, -6) {$-$};
+        \node[op] (times2_3) at (6, -6) {$\times$};
+        \node (psi4) at (6, -7) {$\psi^3$};
+
+        \draw[->] (minus1_2) -- (plus2_2);
+        \draw[->] (minus1_2) -- (minus2_3);
+        \draw[->] (minus1_3) -- (times2_3);
+        \draw[->] (psi4) -- (times2_3);
+        \draw[->] (times2_3) -- (minus2_3);
+        \draw[->] (times2_3) -- (plus2_2);
+
+        % --- Saídas (Em ordem Bit-Reversed) ---
+        \node[right=0.5cm of plus2_0]  (X0) {\Large $X_0$};
+        \node[right=0.5cm of minus2_1] (X2) {\Large $X_2$};
+        \node[right=0.5cm of plus2_2]  (X1) {\Large $X_1$};
+        \node[right=0.5cm of minus2_3] (X3) {\Large $X_3$};
+
+        \draw[->] (plus2_0) -- (X0);
+        \draw[->] (minus2_1) -- (X2);
+        \draw[->] (plus2_2) -- (X1);
+        \draw[->] (minus2_3) -- (X3);
+
+    \end{tikzpicture}
+    \end{center}
+
 
 % Uso: \tabelaSimulacao{Legenda}{Label}{Conteúdo das Linhas}
 
