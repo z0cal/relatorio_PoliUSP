@@ -8,189 +8,261 @@
 \RequirePackage{xcolor}
 \RequirePackage{ifthen}
 \RequirePackage{fontspec}
-\RequirePackage{iftex}
-\RequirePackage{booktabs} 
-\RequirePackage{float}    
-\RequirePackage{graphicx} 
-\RequirePackage{picture} 
-\RequirePackage{eulervm}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{siunitx}
+\RequirePackage{float}
+\RequirePackage{minted}
+\RequirePackage[OT1]{eulervm}
 \RequirePackage{etoc}
+\RequirePackage{tikz}
+\usetikzlibrary{tikzmark,calc,shapes,backgrounds,arrows.meta,positioning}
 \RequirePackage[pagestyles]{titlesec}
 \RequirePackage[
   top=26mm,
   headheight=14mm,
   headsep=10mm
 ]{geometry}
-\RequirePackage[
-    colorlinks=true,      % Ativa cores nos links (false para box em volta)
-    linkcolor=azulpoli,   % Cor dos links internos (Sumário, Figuras)
-    citecolor=azulpoli,   % Cor das citações bibliográficas
-    urlcolor=azulpoli,    % Cor dos links de internet
-    pdfdisplaydoctitle=true, % Mostra o título na barra da janela
-    bookmarksnumbered=true   % Numera os bookmarks no PDF
-]{hyperref}
-
 % --- 2. CORES E FONTES ---
 \definecolor{azulpoli}{cmyk}{1.0, 0.72, 0.0, 0.18}
-% Fonte Copperplate (ajuste o Path se necessário)
 \newfontfamily\fonteCapa[
   Path = ./fontes/,
   UprightFont = {copperplate_gothic_bt.ttf},
   BoldFont    = {CopperplateGothicBT-Bold.otf}
 ]{Copperplate Gothic BT}
 
-% --- 3. INICIALIZAÇÃO DE VARIÁVEIS ---
+\sisetup{
+  output-decimal-marker = {,},  % vírgula decimal (padrão brasileiro)
+  group-separator       = {.},  % ponto como separador de milhar
+  group-minimum-digits  = 4,
+}
+
+\RequirePackage[
+  colorlinks=true,
+  linkcolor=azulpoli,
+  citecolor=azulpoli,
+  urlcolor=azulpoli,
+  pdfdisplaydoctitle=true,
+  bookmarksnumbered=true
+]{hyperref}
+
+% subcaption e cleveref devem vir após hyperref
+\RequirePackage{subcaption}
+\RequirePackage{cleveref}
+
+\crefname{figure}{Figura}{Figuras}
+\Crefname{figure}{Figura}{Figuras}
+\crefname{subfigure}{Figura}{Figuras}
+\Crefname{subfigure}{Figura}{Figuras}
+\crefname{table}{Tabela}{Tabelas}
+\Crefname{table}{Tabela}{Tabelas}
+\crefname{equation}{Equação}{Equações}
+\Crefname{equation}{Equação}{Equações}
+\crefname{section}{Seção}{Seções}
+\Crefname{section}{Seção}{Seções}
+\crefname{subsection}{Subseção}{Subseções}
+\Crefname{subsection}{Subseção}{Subseções}
+
+% --- 3. VARIÁVEIS DE METADADOS ---
 \newcommand{\poliTituloSalvo}{Titulo do Relatorio}
 \newcommand{\poliTituloCurtoSalvo}{Titulo Curto}
 \newcommand{\poliSubtituloSalvo}{}
-\newcommand{\poliAutorSalvo}{Nome do Autor}
+\newcommand{\poliDisciplinaSalva}{}
+\newcommand{\poliDepartamentoSalvo}{}
+\newcommand{\poliAutoresLista}{}
 \newcommand{\poliDataSalva}{\today}
 \newboolean{temSubtitulo}\setboolean{temSubtitulo}{false}
 
-\newcommand{\titulo}[2][]{
-    \renewcommand{\poliTituloSalvo}{#2}
-    \ifthenelse{\equal{#1}{}}{
-        \renewcommand{\poliTituloCurtoSalvo}{#2}
-    }{
-        \renewcommand{\poliTituloCurtoSalvo}{#1}
-    }
+\newcommand{\titulo}[2][]{%
+  \renewcommand{\poliTituloSalvo}{#2}%
+  \ifthenelse{\equal{#1}{}}{%
+    \renewcommand{\poliTituloCurtoSalvo}{#2}%
+  }{%
+    \renewcommand{\poliTituloCurtoSalvo}{#1}%
+  }%
 }
-% =========================
-% Departamento (metadado)
-% =========================
-\newcommand{\poliDepartamentoSalvo}{} % valor padrão vazio
-
-\newcommand{\departamento}[1]{%
-  \renewcommand{\poliDepartamentoSalvo}{#1}%
+\newcommand{\subtitulo}[1]{%
+  \renewcommand{\poliSubtituloSalvo}{#1}%
+  \setboolean{temSubtitulo}{true}%
 }
-
-\newcommand{\subtitulo}[1]{
-    \renewcommand{\poliSubtituloSalvo}{#1}
-    \setboolean{temSubtitulo}{true}
-}
-\newlength{\poliAutoresAltura}
-\setlength{\poliAutoresAltura}{5\baselineskip}
-
-\newcommand{\poliAutoresLista}{}
+\newcommand{\disciplina}[1]{\renewcommand{\poliDisciplinaSalva}{#1}}
+\newcommand{\departamento}[1]{\renewcommand{\poliDepartamentoSalvo}{#1}}
 \newcommand{\Autores}[1]{\renewcommand{\poliAutoresLista}{#1}}
+\newcommand{\data}[1]{\renewcommand{\poliDataSalva}{#1}}
 
+% --- 4. BLOCO DE AUTORES ---
 \newcommand{\poliBlocoAutores}{%
-  \begin{minipage}[t][\poliAutoresAltura][t]{\textwidth}
-    \centering
-    \large
+  \begin{minipage}[t]{\textwidth}
+    \centering\large
     \poliAutoresLista
   \end{minipage}%
 }
 
-
+% --- 5. SUMÁRIO LOCAL DE SEÇÃO ---
 \newcommand{\gerarSumarioLocal}{%
-    \begingroup 
-    \etocsettocdepth{subsection}
-    \etocsetstyle{section}{}{}{}{}
-
-    \etocsetstyle{subsection}
-    {} 
-    {% 1. Aumentamos o leftskip para recuar todo o bloco da esquerda
-     \leavevmode\leftskip 1.5em \noindent 
-    } 
-    {% Conteúdo
-        \textbf{\etocnumber} 
-        \hspace{0.5em}        
-        \etocname            
-        \nobreak
-        \leaders\hbox to 0.5em{\hss.\hss}\hfill
-        \nobreak
-        \makebox[1.2em][r]{\textbf{\etocpage}} 
-        % 2. Adicionamos um espaço aqui para recuar a página da borda direita
-        \hspace{1.5em} 
-        \par\vspace{5pt}    
+  \begingroup
+  \etocsettocdepth{subsection}
+  \etocsetstyle{section}{}{}{}{}
+  \etocsetstyle{subsection}
+    {}
+    {\leavevmode\leftskip 1.5em \noindent}
+    {%
+      \textbf{\etocnumber}\hspace{0.5em}%
+      \etocname
+      \nobreak
+      \leaders\hbox to 0.5em{\hss.\hss}\hfill
+      \nobreak
+      \makebox[1.2em][r]{\textbf{\etocpage}}%
+      \hspace{1.5em}%
+      \par\vspace{5pt}%
     }
     {}
-
-    \etocsettocstyle
+  \etocsettocstyle
     {%
-        \begin{center}
-        \begin{minipage}{0.85\textwidth}
-        \noindent\textbf{Contents} 
-        \par\vspace{1pt}
-        \hrule height 0.6pt 
-        \vspace{10pt}        
+      \begin{center}\begin{minipage}{0.85\textwidth}
+      \noindent\textbf{Seções}
+      \par\vspace{1pt}\hrule height 0.6pt\vspace{10pt}%
     }
     {%
-        \vspace{5pt}
-        \hrule height 0.6pt 
-        \end{minipage}
-        \end{center}
-        \vspace{1cm}        
+      \vspace{5pt}\hrule height 0.6pt
+      \end{minipage}\end{center}%
+      \vspace{0.5cm}%
     }
-
-    \localtableofcontents
-    \endgroup
+  \localtableofcontents
+  \endgroup
 }
 
-%\newcommand{\autor}[1]{\renewcommand{\poliAutorSalvo}{#1}}
-\newcommand{\data}[1]{\renewcommand{\poliDataSalva}{#1}}
+% --- 6. CÓDIGO-FONTE (minted) ---
+% Padrão visual aplicado globalmente a todos os blocos minted
+\setminted{
+  fontsize   = \small,
+  linenos    = true,
+  breaklines = true,
+  frame      = lines,
+  framesep   = 6pt,
+  bgcolor    = gray!6,
+  numbersep  = 8pt,
+}
 
-% --- Comando para Tabela de Simulação (Modelo LEGv8) ---
-% Parâmetros: #1=Legenda, #2=Label, #3=Conteúdo das linhas
-% --- Comando para Tabela de Simulação (Modelo LEGv8) ---
-% Parâmetros: #1=Legenda, #2=Label, #3=Conteúdo das linhas
+% Atalhos de linguagem (geram ambientes vhdlcode, pythoncode, ccode)
+\newminted{vhdl}{}
+\newminted{python}{}
+\newminted{c}{}
+
+
+\crefname{listing}{Código}{Códigos}
+\Crefname{listing}{Código}{Códigos}
+
+% --- 7. AMBIENTES MATEMÁTICOS (amsthm) ---
+
+% Estilos visuais consistentes com o template
+\newtheoremstyle{poliPlain}
+  {8pt}{6pt}
+  {\itshape}{}
+  {\color{azulpoli}\fonteCapa\bfseries}{.}
+  { }{}
+
+\newtheoremstyle{poliDefinition}
+  {8pt}{6pt}
+  {}{}
+  {\color{azulpoli}\fonteCapa\bfseries}{.}
+  { }{}
+
+\newtheoremstyle{poliRemark}
+  {6pt}{4pt}
+  {}{}
+  {\color{azulpoli}\fonteCapa\itshape}{.}
+  { }{}
+
+% Ambientes numerados por seção
+\theoremstyle{poliPlain}
+\newtheorem{teorema}{Teorema}[section]
+\newtheorem{lema}{Lema}[section]
+\newtheorem{corolario}{Corolário}[section]
+\newtheorem{proposicao}{Proposição}[section]
+
+\theoremstyle{poliDefinition}
+\newtheorem{definicao}{Definição}[section]
+\newtheorem{exemplo}{Exemplo}[section]
+
+\theoremstyle{poliRemark}
+\newtheorem*{observacao}{Observação}
+
+% Renomeia "Proof" para português
+\renewcommand{\proofname}{Demonstração}
+
+% Cleveref
+\crefname{teorema}{Teorema}{Teoremas}
+\Crefname{teorema}{Teorema}{Teoremas}
+\crefname{lema}{Lema}{Lemas}
+\Crefname{lema}{Lema}{Lemas}
+\crefname{corolario}{Corolário}{Corolários}
+\Crefname{corolario}{Corolário}{Corolários}
+\crefname{proposicao}{Proposição}{Proposições}
+\Crefname{proposicao}{Proposição}{Proposições}
+\crefname{definicao}{Definição}{Definições}
+\Crefname{definicao}{Definição}{Definições}
+\crefname{exemplo}{Exemplo}{Exemplos}
+\Crefname{exemplo}{Exemplo}{Exemplos}
+
+% --- 8. TABELAS AUXILIARES ---
+% Todas usam tabularx: colunas X dividem o espaço restante automaticamente.
+
+% \tabelaSimulacao{<caption>}{<label>}{<linhas>}
 \newcommand{\tabelaSimulacao}[3]{%
   \begin{table}[H]
     \centering
-    \caption{#1}
-    \label{#2}
-    \resizebox{\textwidth}{!}{%
-      \begin{tabular}{cllcc}
-        \toprule
-        \textbf{ (Caso)} & \textbf{Operação} & \textbf{Sinais de entrada} &
-        \textbf{Resultado esperado} & \textbf{Resultado observado} \\
-        \midrule
-        #3
-        \bottomrule
-      \end{tabular}%
-    }%
+    \caption{#1}\label{#2}
+    \begin{tabularx}{\textwidth}{cXXXX}
+      \toprule
+      \textbf{(Caso)} & \textbf{Operação} & \textbf{Sinais de entrada} &
+      \textbf{Resultado esperado} & \textbf{Resultado observado} \\
+      \midrule
+      #3
+      \bottomrule
+    \end{tabularx}
   \end{table}%
 }
-% \tabelaDuasColunas{<caption>}{<label>}{<coluna 1>}{<coluna 2>}{<linhas>}
+
+% \tabeladuas{<caption>}{<label>}{<col1>}{<col2>}{<linhas>}
 \newcommand{\tabeladuas}[5]{%
   \begin{table}[H]
     \centering
-    \caption{#1}
-    \label{#2}
-    \begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+    \caption{#1}\label{#2}
+    \begin{tabularx}{\textwidth}{XX}
       \toprule
       \textbf{#3} & \textbf{#4} \\
       \midrule
       #5
       \bottomrule
-    \end{tabular}
+    \end{tabularx}
   \end{table}%
 }
-% \tabelaTresColunas{<caption>}{<label>}{<col1>}{<col2>}{<col3>}{<linhas>}
+
+% \tabelatres{<caption>}{<label>}{<col1>}{<col2>}{<col3>}{<linhas>}
 \newcommand{\tabelatres}[6]{%
   \begin{table}[H]
     \centering
-    \caption{#1}
-    \label{#2}
-    \begin{tabular}{p{0.30\textwidth} p{0.30\textwidth} p{0.30\textwidth}}
+    \caption{#1}\label{#2}
+    \begin{tabularx}{\textwidth}{XXX}
       \toprule
       \textbf{#3} & \textbf{#4} & \textbf{#5} \\
       \midrule
       #6
       \bottomrule
-    \end{tabular}
+    \end{tabularx}
   \end{table}%
 }
 
-
-% --- 4. IMAGENS (Sem Underscores nos nomes!) ---
-% IMPORTANTE: Renomeie o arquivo na pasta para 'logorobusto.pdf'
-\newcommand{\poliBrasao}{logospoli/logorobusto} 
-\newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge} % Nome do arquivo PDF
-% Nome seguro para a barra da USP
-\newcommand{\poliBarraLogo}{logospoli/usp+polibarra} 
+% --- 7. IMAGENS ---
+\newcommand{\poliBrasao}{logospoli/logorobusto}
+\newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge}
+\newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
 \newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
+
 \newcommand{\MarcaAguaCapa}{%
   \AddToShipoutPictureBG*{%
     \AtPageCenter{%
@@ -201,129 +273,99 @@
   }%
 }
 
-% --- 5. LAYOUT DA CAPA (VERSÃO ESTÁTICA/TRAVADA) ---
-\renewcommand{\maketitle}{
+% --- 8. CAPA ---
+\renewcommand{\maketitle}{%
   \begin{titlepage}
     \MarcaAguaCapa
     \centering
-    
-    % 1. CABEÇALHO (Fixo via eso-pic, não empurra o texto)
-    \AddToShipoutPictureBG*{
-      \AtPageUpperLeft{
-        \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-2cm}){
-          \makebox(0,0)[t]{
+
+    % Cabeçalho fixo via eso-pic (não desloca o conteúdo da página)
+    \AddToShipoutPictureBG*{%
+      \AtPageUpperLeft{%
+        \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-2cm}){%
+          \makebox(0,0)[t]{%
             \begin{tabular}{c}
               \includegraphics[width=16cm]{\poliImgCabecalho} \\
-              \fonteCapa  \poliDepartamentoSalvo
-            \end{tabular}
-          }
-        }
-      }
+              \fonteCapa \poliDepartamentoSalvo
+            \end{tabular}%
+          }%
+        }%
+      }%
     }
 
-    % =========================================================
-    % 2. BLOCO DO TÍTULO (Altura fixa: 6cm)
-    % O \vspace* empurra o início do conteúdo para baixo do cabeçalho
-    % =========================================================
-    \vspace*{3.5cm} 
-    
+    \vspace*{3.5cm}
+
     \begin{minipage}[t][12cm][c]{\textwidth}
-        \centering
-        {\huge \fonteCapa \bfseries \color{azulpoli} \poliTituloSalvo \par}
-        
-        \ifthenelse{\boolean{temSubtitulo}}{
-            \vspace{1cm}
-            {\Large \color{azulpoli} \textbf{\poliSubtituloSalvo} \par}
-        }{}
+      \centering
+      {\huge\fonteCapa\bfseries\color{azulpoli}\poliTituloSalvo\par}
+      \ifthenelse{\boolean{temSubtitulo}}{%
+        \vspace{1cm}%
+        {\Large\color{azulpoli}\textbf{\poliSubtituloSalvo}\par}%
+      }{}
     \end{minipage}
 
-    % Espaço fixo entre o bloco do título e o bloco dos autores
     \vspace{2cm}
 
-    % =========================================================
-    % 3. BLOCO DOS AUTORES (Altura fixa total incluindo linhas)
-    % =========================================================
-    
-    % Linha superior
     \includegraphics{\poliFilet}
-    
-    \vspace{0.2cm} % Espacinho respiro
-    
-    % A minipage dos autores já tem 5cm fixos definidos na sua variável \poliAutoresAltura
+    \vspace{0.2cm}
+
     \poliBlocoAutores
-    
-    \vspace{0.2cm} % Espacinho respiro
-    
-    % Linha inferior
+
+    \vspace{0.2cm}
     \includegraphics{\poliFilet}
 
-    % =========================================================
-    % 4. DATA (Empurrada para o final)
-    % =========================================================
     \vfill
-    {\large \poliDataSalva \par}
-    % Ajuste fino se a data ficar muito colada na margem inferior
-    
+    \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
+      {\large\fonteCapa\color{azulpoli}\poliDisciplinaSalva\par}%
+      \vspace{0.4cm}%
+    }
+    {\large\poliDataSalva\par}
+
   \end{titlepage}
   \clearpage
 }
-\newlength{\alturaLogoHeader}
-\setlength{\alturaLogoHeader}{10mm} % adjust: 8mm, 12mm, ...
 
-% --- Blocos do cabeçalho ---
+% --- 9. CABEÇALHO E RODAPÉ ---
+\newlength{\alturaLogoHeader}
+\setlength{\alturaLogoHeader}{10mm}
+
 \newcommand{\poliHeaderTitulo}{%
   \fonteCapa\color{azulpoli}\poliTituloCurtoSalvo%
 }
-
 \newcommand{\poliHeaderLogo}{%
   \includegraphics[height=\alturaLogoHeader]{\poliBarraLogo}%
 }
 
-% --- Estilo de página com cabeçalho alternado (pares/ímpares) ---
-% --- Estilo de página com cabeçalho alternado (pares/ímpares) ---
-\newpagestyle{poliusp}{
-  % Sintaxe: \sethead[par-esq][par-centro][par-dir]{impar-esq}{impar-centro}{impar-dir}
-  \sethead[\poliHeaderLogo][][\poliHeaderTitulo] % Páginas Pares
-          {\poliHeaderTitulo}{}{\poliHeaderLogo} % Páginas Ímpares
-
+% Logo no lado interno, título no lado externo (padrão livro)
+\newpagestyle{poliusp}{%
+  \sethead[\poliHeaderLogo][][\poliHeaderTitulo]%  páginas pares
+          {\poliHeaderTitulo}{}{\poliHeaderLogo}%  páginas ímpares
   \headrule
-
-% Rodapé: número centralizado em todas as páginas
-\setfoot[][\fonteCapa\color{azulpoli}\thepage][] % páginas pares: centro
-        {}{\fonteCapa\color{azulpoli}\thepage}{} % páginas ímpares: centro
- % Direita em páginas ímpares
+  \setfoot[][\fonteCapa\color{azulpoli}\thepage][]%  páginas pares
+          {}{\fonteCapa\color{azulpoli}\thepage}{}%  páginas ímpares
 }
-% Seções centralizadas, sem cor
-\titleformat{\section}
-  {\centering\fonteCapa\bfseries\Large} % formato
-  {\thesection}{0.8em}{}                % número + espaçamento + título
 
-% Subseções à esquerda, com fonte mais fina
-\titleformat{\subsection}
-  {\raggedright\fonteCapa\mdseries\large}
-  {\thesubsection}{0.8em}{}
-
-
-% (Opcional) Espaçamentos verticais mais "polidos"
-\titlespacing*{\section}{0pt}{2.5ex plus 0.8ex minus 0.4ex}{1.2ex}
-\titlespacing*{\subsection}{0pt}{2.0ex plus 0.6ex minus 0.3ex}{0.8ex}
-
-% 1. Traduz o nome para Português
+% --- 10. FORMATAÇÃO DE SEÇÕES ---
 \renewcommand{\contentsname}{Sumário}
 
-% 2. Formatação da Seção Numerada (Você já tem isso, mantenha)
 \titleformat{\section}
   {\centering\fonteCapa\bfseries\Large}
   {\thesection}{0.8em}{}
 
-% 3. NOVO: Formatação da Seção SEM Número (Sumário, Referências)
-% O parametro "numberless" aplica o estilo para seções com *
+% Mesmo estilo para seções sem número (\section*)
 \titleformat{name=\section,numberless}
-  {\centering\fonteCapa\bfseries\Large} % Mesmo estilo da normal
+  {\centering\fonteCapa\bfseries\Large}
   {}{0em}{}
 
-% --- 7. ATIVAÇÃO ---
-\AtBeginDocument{
+\titleformat{\subsection}
+  {\raggedright\fonteCapa\mdseries\large}
+  {\thesubsection}{0.8em}{}
+
+\titlespacing*{\section}   {0pt}{2.5ex plus 0.8ex minus 0.4ex}{1.2ex}
+\titlespacing*{\subsection}{0pt}{2.0ex plus 0.6ex minus 0.3ex}{0.8ex}
+
+% --- 11. ATIVAÇÃO ---
+\AtBeginDocument{%
   \maketitle
-  \pagestyle{poliusp}
+  \pagestyle{poliusp}%
 }

@@ -1,13 +1,10 @@
 # ===== Config =====
-MAIN   := main
-OUTDIR := build
-
+# Engine e outdir são lidos do .latexmkrc automaticamente pelo latexmk/VimTeX
+MAIN    := main
+OUTDIR  := build
 LATEXMK := latexmk
-ENGINE  := lualatex
 
-# flags seguras e úteis
-LATEXMK_FLAGS := -$(ENGINE) -interaction=nonstopmode -halt-on-error -file-line-error \
-                 -synctex=1 -outdir=$(OUTDIR)
+LATEXMK_FLAGS := -interaction=nonstopmode -halt-on-error -file-line-error -synctex=1
 
 # ===== Targets =====
 .PHONY: all pdf clean distclean watch check-fonts
@@ -25,7 +22,7 @@ watch: check-fonts
 
 # limpa só o build
 clean:
-	$(LATEXMK) -C -outdir=$(OUTDIR) $(MAIN).tex || true
+	$(LATEXMK) -C $(MAIN).tex || true
 	rm -rf $(OUTDIR)
 
 # limpa também lixo gerado no diretório raiz (se houver)

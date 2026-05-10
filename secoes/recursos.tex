@@ -1,0 +1,143 @@
+\section{Recursos do Template}
+
+% ----------------------------------------------------------------
+\subsection{Código-Fonte com \texttt{minted}}
+
+Para blocos com legenda e label, use \verb|listing| (float) + \verb|minted|:
+
+\begin{listing}[H]
+  \caption{Contador de 4 bits em VHDL}
+  \label{cod:contador}
+  \begin{minted}{vhdl}
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity contador is
+  port (
+    clk   : in  std_logic;
+    reset : in  std_logic;
+    q     : out std_logic_vector(3 downto 0)
+  );
+end entity;
+
+architecture rtl of contador is
+  signal count : unsigned(3 downto 0) := (others => '0');
+begin
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if reset = '1' then
+        count <= (others => '0');
+      else
+        count <= count + 1;
+      end if;
+    end if;
+  end process;
+  q <= std_logic_vector(count);
+end architecture;
+  \end{minted}
+\end{listing}
+
+\begin{listing}[H]
+  \caption{Script de análise de simulação}
+  \label{cod:python}
+  \begin{minted}{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Lê saída do GTKWave exportada como CSV
+data = np.loadtxt("sim.csv", delimiter=",", skiprows=1)
+t, q = data[:, 0], data[:, 2]
+
+plt.plot(t * 1e9, q, drawstyle="steps-post")
+plt.xlabel("Tempo (ns)")
+plt.ylabel("Saída q")
+plt.savefig("forma_de_onda.pdf")
+  \end{minted}
+\end{listing}
+
+Para trechos inline use \verb|\mintinline|,
+por exemplo: \mintinline{vhdl}{if rising_edge(clk) then}.
+
+Referências: \cref{cod:contador} e \cref{cod:python}.
+
+% ----------------------------------------------------------------
+\subsection{Unidades Físicas com \texttt{siunitx}}
+
+Use \verb|\qty{valor}{unidade}| para quantidades e \verb|\num{valor}| para números.
+A vírgula decimal e o separador de milhar seguem o padrão brasileiro automaticamente.
+
+Exemplos de quantidades comuns em Engenharia Elétrica:
+
+\begin{itemize}
+  \item Frequência de clock: \qty{50}{\mega\hertz}
+  \item Tensão de alimentação: \qty{3.3}{\volt}
+  \item Corrente de fuga: \qty{1.5}{\micro\ampere}
+  \item Período de amostragem: \qty{20}{\nano\second}
+  \item Resistência: \qty{10}{\kilo\ohm}
+  \item Capacitância: \qty{100}{\pico\farad}
+\end{itemize}
+
+Número com separador de milhar: \num{1234567}.
+Notação científica: \num{1.5e-9}.
+
+\tabeladuas
+  {Parâmetros de temporização}
+  {tab:timing}
+  {Parâmetro}{Valor}
+  {
+    Período de clock  & \qty{20}{\nano\second} \\
+    Setup time        & \qty{1.5}{\nano\second} \\
+    Hold time         & \qty{0.25}{\nano\second} \\
+    Tensão VCC        & \qty{3.3}{\volt} \\
+    Corrente máxima   & \qty{200}{\milli\ampere} \\
+  }
+
+% ----------------------------------------------------------------
+\subsection{Subfiguras com \texttt{subcaption}}
+
+Use o ambiente \verb|subfigure| para colocar figuras lado a lado com legendas
+e rótulos independentes. Substitua os retângulos abaixo por \verb|\includegraphics|.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \draw[fill=azulpoli!15, rounded corners=4pt] (0,0) rectangle (4,2.5);
+      \node at (2,1.25) {\small Imagem A};
+    \end{tikzpicture}
+    \caption{Primeira subfigura.}
+    \label{fig:sub-a}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.45\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \draw[fill=azulpoli!35, rounded corners=4pt] (0,0) rectangle (4,2.5);
+      \node at (2,1.25) {\small Imagem B};
+    \end{tikzpicture}
+    \caption{Segunda subfigura.}
+    \label{fig:sub-b}
+  \end{subfigure}
+  \caption{Exemplo de subfiguras com \texttt{subcaption}.}
+  \label{fig:subfiguras}
+\end{figure}
+
+% ----------------------------------------------------------------
+\subsection{Referências Automáticas com \texttt{cleveref}}
+
+Use \verb|\cref{label}| no lugar de escrever \verb|Figura~\ref{label}| na mão.
+O tipo da referência é inserido automaticamente em português:
+
+\begin{itemize}
+  \item \verb|\cref{fig:subfiguras}|          $\to$ \cref{fig:subfiguras}
+  \item \verb|\cref{fig:sub-a}|               $\to$ \cref{fig:sub-a}
+  \item \verb|\cref{fig:sub-a,fig:sub-b}|     $\to$ \cref{fig:sub-a,fig:sub-b}
+  \item \verb|\cref{tab:timing}|              $\to$ \cref{tab:timing}
+  \item \verb|\cref{eq:integral}|             $\to$ \cref{eq:integral}
+\end{itemize}
+
+\verb|\Cref| (maiúsculo) é usado no início de frase:
+\Cref{fig:subfiguras} mostra um exemplo de subfiguras lado a lado.

@@ -1,8 +1,14 @@
+build/
+
+# Artifacts gerados na raiz (use 'make distclean' para remover)
 *.aux
-*.log
-*.toc
-*.gz
-*.out
+*.bbl
+*.bcf
+*.blg
 *.fdb_latexmk
 *.fls
-build/
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc

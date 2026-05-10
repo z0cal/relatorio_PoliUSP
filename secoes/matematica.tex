@@ -1,0 +1,60 @@
+\section{Seção com Matemática}
+
+Texto com matemática inline: $e^{i\pi}+1=0$, $\alpha+\beta=\gamma$ e $x^2+y^2=z^2$.
+
+\subsection{Ambiente equation}
+
+\begin{equation}
+  \label{eq:integral}
+  \int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}.
+\end{equation}
+
+\subsection{Ambiente align}
+
+\begin{align}
+  (a+b)^2 &= a^2 + 2ab + b^2, \\
+  (a-b)^2 &= a^2 - 2ab + b^2.
+\end{align}
+
+\subsection{Ambientes Matemáticos}
+
+Os ambientes seguem o estilo visual do template e são compatíveis com \verb|\cref|.
+
+\begin{definicao}[Transformada Z]
+  \label{def:transformada-z}
+  A Transformada Z bilateral de um sinal discreto $x[n]$ é definida como
+  \[
+    X(z) = \sum_{n=-\infty}^{\infty} x[n]\, z^{-n}, \quad z \in \mathbb{C}.
+  \]
+\end{definicao}
+
+\begin{teorema}[Deslocamento no Tempo]
+  \label{teo:deslocamento}
+  Se $X(z) = \mathcal{Z}\{x[n]\}$, então para qualquer inteiro $k$:
+  \[
+    \mathcal{Z}\{x[n-k]\} = z^{-k} X(z).
+  \]
+\end{teorema}
+
+\begin{proof}
+  Substituindo diretamente na \cref{def:transformada-z}:
+  \[
+    \sum_{n=-\infty}^{\infty} x[n-k]\,z^{-n}
+    = z^{-k} \sum_{m=-\infty}^{\infty} x[m]\,z^{-m}
+    = z^{-k} X(z). \qedhere
+  \]
+\end{proof}
+
+\begin{corolario}
+  O atraso de um sample corresponde a multiplicar por $z^{-1}$ no domínio Z.
+\end{corolario}
+
+\begin{exemplo}
+  Para $x[n] = \delta[n]$ (impulso unitário), tem-se $X(z) = 1$.
+  Pelo \cref{teo:deslocamento}, $\mathcal{Z}\{\delta[n-1]\} = z^{-1}$.
+\end{exemplo}
+
+\begin{observacao}
+  A região de convergência (ROC) deve ser sempre especificada,
+  pois sequências distintas podem ter a mesma expressão $X(z)$.
+\end{observacao}
