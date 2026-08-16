@@ -1,5 +1,42 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{poliusp}[2026/02/05 Template Poli USP v1.1]
+\ProvidesPackage{poliusp}[2026/08/16 Template Poli USP v1.2]
+
+% --- 0. OPÇÕES ---
+% O núcleo carrega apenas o que todo relatório usa: capa, cabeçalho/rodapé,
+% figuras e tabelas. O resto entra sob demanda, para que um relatório curto não
+% pague o custo de compilação de amsthm, siunitx, tikz e minted.
+%
+%   \usepackage[math,units]{poliusp}   % só o que for usar
+%   \usepackage[full]{poliusp}         % tudo (equivale à v1.1)
+\newif\ifpoli@math
+\newif\ifpoli@units
+\newif\ifpoli@localtoc
+\newif\ifpoli@subfigures
+\newif\ifpoli@smartrefs
+\newif\ifpoli@floatbarriers
+\newif\ifpoli@tikz
+\newif\ifpoli@code
+
+\DeclareOption{math}{\poli@mathtrue}
+\DeclareOption{units}{\poli@unitstrue}
+\DeclareOption{localtoc}{\poli@localtoctrue}
+\DeclareOption{subfigures}{\poli@subfigurestrue}
+\DeclareOption{smartrefs}{\poli@smartrefstrue}
+\DeclareOption{floatbarriers}{\poli@floatbarrierstrue}
+\DeclareOption{tikz}{\poli@tikztrue}
+\DeclareOption{code}{\poli@codetrue}
+\DeclareOption{full}{%
+  \poli@mathtrue
+  \poli@unitstrue
+  \poli@localtoctrue
+  \poli@subfigurestrue
+  \poli@smartrefstrue
+  \poli@floatbarrierstrue
+  \poli@tikztrue
+  \poli@codetrue
+}
+\DeclareOption*{\PackageWarning{poliusp}{Opcao desconhecida: \CurrentOption}}
+\ProcessOptions\relax
 
 % --- 1. PACOTES ---
 \RequirePackage{graphicx}
@@ -7,25 +44,46 @@
 \RequirePackage{transparent}
 \RequirePackage{xcolor}
 \RequirePackage{ifthen}
-\RequirePackage{fontspec}
-\RequirePackage{amsmath}
-\RequirePackage{amssymb}
-\RequirePackage{amsthm}
+\RequirePackage{fontspec}   % núcleo: a capa depende da Copperplate
+\ifpoli@math
+  \RequirePackage{amsmath}
+  \RequirePackage{amssymb}
+  \RequirePackage{amsthm}
+\fi
 \RequirePackage{booktabs}
 \RequirePackage{tabularx}
-\RequirePackage{siunitx}
-\RequirePackage{float}
-\RequirePackage{minted}
-\RequirePackage[OT1]{eulervm}
-\RequirePackage{etoc}
-\RequirePackage{tikz}
-\usetikzlibrary{tikzmark,calc,shapes,backgrounds,arrows.meta,positioning}
+\ifpoli@units
+  \RequirePackage{siunitx}
+\fi
+\RequirePackage{float}  % compatibilidade com relatórios legados que ainda usam [H]
+\ifpoli@floatbarriers
+  \RequirePackage[section]{placeins}
+\fi
+\ifpoli@code
+  \RequirePackage{minted}
+\fi
+\ifpoli@localtoc
+  \RequirePackage{etoc}
+\fi
+\ifpoli@tikz
+  \RequirePackage{tikz}
+  \usetikzlibrary{tikzmark,calc,shapes,backgrounds,arrows.meta,positioning}
+\fi
 \RequirePackage[pagestyles]{titlesec}
 \RequirePackage[
   top=26mm,
+  left=25mm,
+  right=25mm,
   headheight=14mm,
   headsep=10mm
 ]{geometry}
+
+% Em modo twoside o LaTeX usa \flushbottom: estica o espaço vertical para forçar
+% todas as páginas à mesma altura, o que em páginas com pouco conteúdo (ou com
+% muitos floats) espalha o texto. \raggedbottom deixa a página com altura
+% natural: texto encostado no TOPO e a sobra no rodapé.
+\raggedbottom
+
 % --- 2. CORES E FONTES ---
 \definecolor{azulpoli}{cmyk}{1.0, 0.72, 0.0, 0.18}
 \newfontfamily\fonteCapa[
@@ -34,11 +92,13 @@
   BoldFont    = {CopperplateGothicBT-Bold.otf}
 ]{Copperplate Gothic BT}
 
-\sisetup{
-  output-decimal-marker = {,},  % vírgula decimal (padrão brasileiro)
-  group-separator       = {.},  % ponto como separador de milhar
-  group-minimum-digits  = 4,
-}
+\ifpoli@units
+  \sisetup{
+    output-decimal-marker = {,},  % vírgula decimal (padrão brasileiro)
+    group-separator       = {.},  % ponto como separador de milhar
+    group-minimum-digits  = 4,
+  }
+\fi
 
 \RequirePackage[
   colorlinks=true,
@@ -50,21 +110,29 @@
 ]{hyperref}
 
 % subcaption e cleveref devem vir após hyperref
-\RequirePackage{subcaption}
-\RequirePackage{cleveref}
+\ifpoli@subfigures
+  \RequirePackage{subcaption}
+\fi
+\ifpoli@smartrefs
+  \RequirePackage{cleveref}
 
-\crefname{figure}{Figura}{Figuras}
-\Crefname{figure}{Figura}{Figuras}
-\crefname{subfigure}{Figura}{Figuras}
-\Crefname{subfigure}{Figura}{Figuras}
-\crefname{table}{Tabela}{Tabelas}
-\Crefname{table}{Tabela}{Tabelas}
-\crefname{equation}{Equação}{Equações}
-\Crefname{equation}{Equação}{Equações}
-\crefname{section}{Seção}{Seções}
-\Crefname{section}{Seção}{Seções}
-\crefname{subsection}{Subseção}{Subseções}
-\Crefname{subsection}{Subseção}{Subseções}
+  \crefname{figure}{Figura}{Figuras}
+  \Crefname{figure}{Figura}{Figuras}
+  \ifpoli@subfigures
+    \crefname{subfigure}{Figura}{Figuras}
+    \Crefname{subfigure}{Figura}{Figuras}
+  \fi
+  \crefname{table}{Tabela}{Tabelas}
+  \Crefname{table}{Tabela}{Tabelas}
+  \crefname{section}{Seção}{Seções}
+  \Crefname{section}{Seção}{Seções}
+  \crefname{subsection}{Subseção}{Subseções}
+  \Crefname{subsection}{Subseção}{Subseções}
+  \ifpoli@math
+    \crefname{equation}{Equação}{Equações}
+    \Crefname{equation}{Equação}{Equações}
+  \fi
+\fi
 
 % --- 3. VARIÁVEIS DE METADADOS ---
 \newcommand{\poliTituloSalvo}{Titulo do Relatorio}
@@ -101,122 +169,137 @@
   \end{minipage}%
 }
 
-% --- 5. SUMÁRIO LOCAL DE SEÇÃO ---
-\newcommand{\gerarSumarioLocal}{%
-  \begingroup
-  \etocsettocdepth{subsection}
-  \etocsetstyle{section}{}{}{}{}
-  \etocsetstyle{subsection}
-    {}
-    {\leavevmode\leftskip 1.5em \noindent}
-    {%
-      \textbf{\etocnumber}\hspace{0.5em}%
-      \etocname
-      \nobreak
-      \leaders\hbox to 0.5em{\hss.\hss}\hfill
-      \nobreak
-      \makebox[1.2em][r]{\textbf{\etocpage}}%
-      \hspace{1.5em}%
-      \par\vspace{5pt}%
-    }
-    {}
-  \etocsettocstyle
-    {%
-      \begin{center}\begin{minipage}{0.85\textwidth}
-      \noindent\textbf{Seções}
-      \par\vspace{1pt}\hrule height 0.6pt\vspace{10pt}%
-    }
-    {%
-      \vspace{5pt}\hrule height 0.6pt
-      \end{minipage}\end{center}%
-      \vspace{0.5cm}%
-    }
-  \localtableofcontents
-  \endgroup
-}
+% --- 5. SUMÁRIO LOCAL DE SEÇÃO ---  [opção: localtoc]
+\ifpoli@localtoc
+  \newcommand{\gerarSumarioLocal}{%
+    \begingroup
+    \etocsettocdepth{subsection}
+    \etocsetstyle{section}{}{}{}{}
+    \etocsetstyle{subsection}
+      {}
+      {\leavevmode\leftskip 1.5em \noindent}
+      {%
+        \textbf{\etocnumber}\hspace{0.5em}%
+        \etocname
+        \nobreak
+        \leaders\hbox to 0.5em{\hss.\hss}\hfill
+        \nobreak
+        \makebox[1.2em][r]{\textbf{\etocpage}}%
+        \hspace{1.5em}%
+        \par\vspace{5pt}%
+      }
+      {}
+    \etocsettocstyle
+      {%
+        \begin{center}\begin{minipage}{0.85\textwidth}
+        \noindent\textbf{Seções}
+        \par\vspace{1pt}\hrule height 0.6pt\vspace{10pt}%
+      }
+      {%
+        \vspace{5pt}\hrule height 0.6pt
+        \end{minipage}\end{center}%
+        \vspace{0.5cm}%
+      }
+    \localtableofcontents
+    \endgroup
+  }
+\fi
 
-% --- 6. CÓDIGO-FONTE (minted) ---
-% Padrão visual aplicado globalmente a todos os blocos minted
-\setminted{
-  fontsize   = \small,
-  linenos    = true,
-  breaklines = true,
-  frame      = lines,
-  framesep   = 6pt,
-  bgcolor    = gray!6,
-  numbersep  = 8pt,
-}
+% --- 6. CÓDIGO-FONTE (minted) ---  [opção: code]
+% minted precisa de LuaLaTeX/pdfLaTeX com -shell-escape e do Pygments; por isso
+% fica atrás de uma opção, e não no núcleo.
+\ifpoli@code
+  % Padrão visual aplicado globalmente a todos os blocos minted
+  \setminted{
+    fontsize   = \small,
+    linenos    = true,
+    breaklines = true,
+    frame      = lines,
+    framesep   = 6pt,
+    bgcolor    = gray!6,
+    numbersep  = 8pt,
+  }
 
-% Atalhos de linguagem (geram ambientes vhdlcode, pythoncode, ccode)
-\newminted{vhdl}{}
-\newminted{python}{}
-\newminted{c}{}
+  % Atalhos de linguagem (geram ambientes vhdlcode, pythoncode, ccode)
+  \newminted{vhdl}{}
+  \newminted{python}{}
+  \newminted{c}{}
 
+  \ifpoli@smartrefs
+    \crefname{listing}{Código}{Códigos}
+    \Crefname{listing}{Código}{Códigos}
+  \fi
+\fi
 
-\crefname{listing}{Código}{Códigos}
-\Crefname{listing}{Código}{Códigos}
+% --- 7. AMBIENTES MATEMÁTICOS (amsthm) ---  [opção: math]
+\ifpoli@math
+  % Estilos visuais consistentes com o template
+  \newtheoremstyle{poliPlain}
+    {8pt}{6pt}
+    {\itshape}{}
+    {\color{azulpoli}\fonteCapa\bfseries}{.}
+    { }{}
 
-% --- 7. AMBIENTES MATEMÁTICOS (amsthm) ---
+  \newtheoremstyle{poliDefinition}
+    {8pt}{6pt}
+    {}{}
+    {\color{azulpoli}\fonteCapa\bfseries}{.}
+    { }{}
 
-% Estilos visuais consistentes com o template
-\newtheoremstyle{poliPlain}
-  {8pt}{6pt}
-  {\itshape}{}
-  {\color{azulpoli}\fonteCapa\bfseries}{.}
-  { }{}
+  % A Copperplate só tem Regular e Bold: pedir \itshape aqui cairia em
+  % substituição silenciosa de fonte. A observação se distingue pelo peso
+  % (regular) contra o negrito dos dois estilos acima.
+  \newtheoremstyle{poliRemark}
+    {6pt}{4pt}
+    {}{}
+    {\color{azulpoli}\fonteCapa\mdseries}{.}
+    { }{}
 
-\newtheoremstyle{poliDefinition}
-  {8pt}{6pt}
-  {}{}
-  {\color{azulpoli}\fonteCapa\bfseries}{.}
-  { }{}
+  % Ambientes numerados por seção
+  \theoremstyle{poliPlain}
+  \newtheorem{teorema}{Teorema}[section]
+  \newtheorem{lema}{Lema}[section]
+  \newtheorem{corolario}{Corolário}[section]
+  \newtheorem{proposicao}{Proposição}[section]
 
-\newtheoremstyle{poliRemark}
-  {6pt}{4pt}
-  {}{}
-  {\color{azulpoli}\fonteCapa\itshape}{.}
-  { }{}
+  \theoremstyle{poliDefinition}
+  \newtheorem{definicao}{Definição}[section]
+  \newtheorem{exemplo}{Exemplo}[section]
 
-% Ambientes numerados por seção
-\theoremstyle{poliPlain}
-\newtheorem{teorema}{Teorema}[section]
-\newtheorem{lema}{Lema}[section]
-\newtheorem{corolario}{Corolário}[section]
-\newtheorem{proposicao}{Proposição}[section]
+  \theoremstyle{poliRemark}
+  \newtheorem*{observacao}{Observação}
 
-\theoremstyle{poliDefinition}
-\newtheorem{definicao}{Definição}[section]
-\newtheorem{exemplo}{Exemplo}[section]
+  % Renomeia "Proof" para português
+  \renewcommand{\proofname}{Demonstração}
 
-\theoremstyle{poliRemark}
-\newtheorem*{observacao}{Observação}
-
-% Renomeia "Proof" para português
-\renewcommand{\proofname}{Demonstração}
-
-% Cleveref
-\crefname{teorema}{Teorema}{Teoremas}
-\Crefname{teorema}{Teorema}{Teoremas}
-\crefname{lema}{Lema}{Lemas}
-\Crefname{lema}{Lema}{Lemas}
-\crefname{corolario}{Corolário}{Corolários}
-\Crefname{corolario}{Corolário}{Corolários}
-\crefname{proposicao}{Proposição}{Proposições}
-\Crefname{proposicao}{Proposição}{Proposições}
-\crefname{definicao}{Definição}{Definições}
-\Crefname{definicao}{Definição}{Definições}
-\crefname{exemplo}{Exemplo}{Exemplos}
-\Crefname{exemplo}{Exemplo}{Exemplos}
+  \ifpoli@smartrefs
+    \crefname{teorema}{Teorema}{Teoremas}
+    \Crefname{teorema}{Teorema}{Teoremas}
+    \crefname{lema}{Lema}{Lemas}
+    \Crefname{lema}{Lema}{Lemas}
+    \crefname{corolario}{Corolário}{Corolários}
+    \Crefname{corolario}{Corolário}{Corolários}
+    \crefname{proposicao}{Proposição}{Proposições}
+    \Crefname{proposicao}{Proposição}{Proposições}
+    \crefname{definicao}{Definição}{Definições}
+    \Crefname{definicao}{Definição}{Definições}
+    \crefname{exemplo}{Exemplo}{Exemplos}
+    \Crefname{exemplo}{Exemplo}{Exemplos}
+  \fi
+\fi
 
 % --- 8. TABELAS AUXILIARES ---
 % Todas usam tabularx: colunas X dividem o espaço restante automaticamente.
+% Y acrescenta alinhamento à esquerda, evitando os vãos entre palavras que o
+% texto justificado abre em colunas estreitas com termos técnicos.
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 
 % \tabelaSimulacao{<caption>}{<label>}{<linhas>}
 \newcommand{\tabelaSimulacao}[3]{%
-  \begin{table}[H]
+  \begin{table}[htbp]
     \centering
     \caption{#1}\label{#2}
-    \begin{tabularx}{\textwidth}{cXXXX}
+    \begin{tabularx}{\textwidth}{cYYYY}
       \toprule
       \textbf{(Caso)} & \textbf{Operação} & \textbf{Sinais de entrada} &
       \textbf{Resultado esperado} & \textbf{Resultado observado} \\
@@ -229,10 +312,10 @@
 
 % \tabeladuas{<caption>}{<label>}{<col1>}{<col2>}{<linhas>}
 \newcommand{\tabeladuas}[5]{%
-  \begin{table}[H]
+  \begin{table}[htbp]
     \centering
     \caption{#1}\label{#2}
-    \begin{tabularx}{\textwidth}{XX}
+    \begin{tabularx}{\textwidth}{YY}
       \toprule
       \textbf{#3} & \textbf{#4} \\
       \midrule
@@ -244,10 +327,10 @@
 
 % \tabelatres{<caption>}{<label>}{<col1>}{<col2>}{<col3>}{<linhas>}
 \newcommand{\tabelatres}[6]{%
-  \begin{table}[H]
+  \begin{table}[htbp]
     \centering
     \caption{#1}\label{#2}
-    \begin{tabularx}{\textwidth}{XXX}
+    \begin{tabularx}{\textwidth}{YYY}
       \toprule
       \textbf{#3} & \textbf{#4} & \textbf{#5} \\
       \midrule
@@ -257,7 +340,7 @@
   \end{table}%
 }
 
-% --- 7. IMAGENS ---
+% --- 9. IMAGENS ---
 \newcommand{\poliBrasao}{logospoli/logorobusto}
 \newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge}
 \newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
@@ -273,7 +356,7 @@
   }%
 }
 
-% --- 8. CAPA ---
+% --- 10. CAPA ---
 \renewcommand{\maketitle}{%
   \begin{titlepage}
     \MarcaAguaCapa
@@ -325,7 +408,7 @@
   \clearpage
 }
 
-% --- 9. CABEÇALHO E RODAPÉ ---
+% --- 11. CABEÇALHO E RODAPÉ ---
 \newlength{\alturaLogoHeader}
 \setlength{\alturaLogoHeader}{10mm}
 
@@ -345,7 +428,7 @@
           {}{\fonteCapa\color{azulpoli}\thepage}{}%  páginas ímpares
 }
 
-% --- 10. FORMATAÇÃO DE SEÇÕES ---
+% --- 12. FORMATAÇÃO DE SEÇÕES ---
 \renewcommand{\contentsname}{Sumário}
 
 \titleformat{\section}
@@ -364,7 +447,7 @@
 \titlespacing*{\section}   {0pt}{2.5ex plus 0.8ex minus 0.4ex}{1.2ex}
 \titlespacing*{\subsection}{0pt}{2.0ex plus 0.6ex minus 0.3ex}{0.8ex}
 
-% --- 11. ATIVAÇÃO ---
+% --- 13. ATIVAÇÃO ---
 \AtBeginDocument{%
   \maketitle
   \pagestyle{poliusp}%

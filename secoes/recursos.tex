@@ -5,7 +5,7 @@
 
 Para blocos com legenda e label, use \verb|listing| (float) + \verb|minted|:
 
-\begin{listing}[H]
+\begin{listing}[htbp]
   \caption{Contador de 4 bits em VHDL}
   \label{cod:contador}
   \begin{minted}{vhdl}
@@ -39,7 +39,7 @@ end architecture;
   \end{minted}
 \end{listing}
 
-\begin{listing}[H]
+\begin{listing}[htbp]
   \caption{Script de análise de simulação}
   \label{cod:python}
   \begin{minted}{python}
@@ -63,6 +63,7 @@ por exemplo: \mintinline{vhdl}{if rising_edge(clk) then}.
 Referências: \cref{cod:contador} e \cref{cod:python}.
 
 % ----------------------------------------------------------------
+\FloatBarrier
 \subsection{Unidades Físicas com \texttt{siunitx}}
 
 Use \verb|\qty{valor}{unidade}| para quantidades e \verb|\num{valor}| para números.
@@ -95,12 +96,13 @@ Notação científica: \num{1.5e-9}.
   }
 
 % ----------------------------------------------------------------
+\FloatBarrier
 \subsection{Subfiguras com \texttt{subcaption}}
 
 Use o ambiente \verb|subfigure| para colocar figuras lado a lado com legendas
 e rótulos independentes. Substitua os retângulos abaixo por \verb|\includegraphics|.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
   \centering
   \begin{subfigure}[b]{0.45\textwidth}
     \centering
@@ -126,6 +128,7 @@ e rótulos independentes. Substitua os retângulos abaixo por \verb|\includegrap
 \end{figure}
 
 % ----------------------------------------------------------------
+\FloatBarrier
 \subsection{Referências Automáticas com \texttt{cleveref}}
 
 Use \verb|\cref{label}| no lugar de escrever \verb|Figura~\ref{label}| na mão.
