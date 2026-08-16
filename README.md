@@ -18,32 +18,41 @@ O arquivo `overleaf-optin.zip` contém uma versão com recursos limitados, prepa
 
 ## Requisitos
 
-### TeX / LaTeX
-- TeX Live com suporte a **LuaLaTeX**
-- `latexmk` (recomendado, usado pelo Makefile)
+- TeX Live com suporte a **LuaLaTeX** e aos pacotes utilizados pelo template
+- `latexmk`, usado pelo Makefile
+- Python com Pygments, usado pelo pacote `minted`
 
 No Arch Linux:
+
 ```bash
-sudo pacman -S texlive latexmk
+sudo pacman -S texlive texlive-langportuguese python-pygments
 ```
-### 2) Compilar o PDF
+
+O grupo `texlive` inclui o pacote `texlive-binextra`, que fornece o `latexmk`.
+
+## Compilar o PDF
 
 Na raiz do repositório, execute:
 
 ```bash
 make
 ```
-Para recompilar automaticamente toda vez que mudar o main.tex
+
+O PDF será gerado em `build/main.pdf`.
+
+Para recompilar automaticamente quando algum arquivo do projeto for alterado:
 
 ```bash
 make watch
 ```
-Para remover a pasta build
+
+Para remover a pasta `build`, incluindo o PDF gerado:
 
 ```bash
 make clean
 ```
-Para remover os arquivos auxiliares
+
+Para também remover eventuais arquivos auxiliares gerados na raiz do projeto:
 
 ```bash
 make distclean
