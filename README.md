@@ -2,6 +2,10 @@
 
 Este repositório contém um template LaTeX (estilo/capa/cabeçalho) para documentos da Poli-USP, com compilação via **LuaLaTeX** e fontes locais (Copperplate).
 
+## Versão para Overleaf
+
+O arquivo `overleaf-optin.zip` contém uma versão com recursos limitados, preparada para compilação no Overleaf. Para usar o projeto completo em uma instância self-hosted do Overleaf, entre em contato pelo e-mail [gabriel_zocal@usp.br](mailto:gabriel_zocal@usp.br).
+
 ## Estrutura do repositório
 
 - `main.tex` — arquivo principal do documento (exemplo de uso do template)
@@ -44,4 +48,3 @@ Para remover os arquivos auxiliares
 ```bash
 make distclean
 ```
-
