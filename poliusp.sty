@@ -220,10 +220,26 @@
     numbersep  = 8pt,
   }
 
-  % Atalhos de linguagem (geram ambientes vhdlcode, pythoncode, ccode)
+  % Atalhos de linguagem (geram ambientes vhdlcode, verilogcode, pythoncode, ccode)
   \newminted{vhdl}{}
+  \newminted{verilog}{}
   \newminted{python}{}
   \newminted{c}{}
+
+  % Ambiente `diff`: mostra alteracoes de codigo com a estetica de um git diff.
+  % O estilo trac pinta o FUNDO das linhas alteradas (verde no +, vermelho no -),
+  % que e o destaque da mudanca; ele so afeta blocos diff, nao o resto do texto.
+  % Sem moldura (o realce ja delimita) e sem numeracao, que num diff numeraria o
+  % bloco e nao o arquivo.
+  \RequirePackage{etoolbox}
+  \newminted[diff]{diff}{
+    style   = trac,
+    frame   = none,
+    linenos = false,
+  }
+  % Sem moldura o bloco encosta no texto ou titulo seguinte; devolve o respiro.
+  \BeforeBeginEnvironment{diff}{\par\addvspace{\medskipamount}}
+  \AfterEndEnvironment{diff}{\par\addvspace{\medskipamount}}
 
   \ifpoli@smartrefs
     \crefname{listing}{Código}{Códigos}
