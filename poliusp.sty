@@ -16,6 +16,7 @@
 \newif\ifpoli@floatbarriers
 \newif\ifpoli@tikz
 \newif\ifpoli@code
+\newif\ifpoli@pseudo
 
 \DeclareOption{math}{\poli@mathtrue}
 \DeclareOption{units}{\poli@unitstrue}
@@ -25,6 +26,7 @@
 \DeclareOption{floatbarriers}{\poli@floatbarrierstrue}
 \DeclareOption{tikz}{\poli@tikztrue}
 \DeclareOption{code}{\poli@codetrue}
+\DeclareOption{pseudo}{\poli@pseudotrue}
 \DeclareOption{full}{%
   \poli@mathtrue
   \poli@unitstrue
@@ -34,6 +36,7 @@
   \poli@floatbarrierstrue
   \poli@tikztrue
   \poli@codetrue
+  \poli@pseudotrue
 }
 \DeclareOption*{\PackageWarning{poliusp}{Opcao desconhecida: \CurrentOption}}
 \ProcessOptions\relax
@@ -61,6 +64,13 @@
 \fi
 \ifpoli@code
   \RequirePackage{minted}
+  \RequirePackage{needspace}  % codigolongo
+\fi
+\ifpoli@pseudo
+  % Antes do hyperref/cleveref, e antes do \floatstyle{plaintop} das listagens
+  % (seção 6): o float algorithm nasce com o estilo ruled do próprio pacote.
+  \RequirePackage{algorithm}
+  \RequirePackage{algpseudocode}
 \fi
 \ifpoli@localtoc
   \RequirePackage{etoc}
@@ -114,7 +124,9 @@
   \RequirePackage{subcaption}
 \fi
 \ifpoli@smartrefs
-  \RequirePackage{cleveref}
+  % brazilian: conjunções em português ("Figuras 1a e 1b"). O babel do
+  % documento não chega ao cleveref, e sem a opção sai "1a and 1b".
+  \RequirePackage[brazilian]{cleveref}
 
   \crefname{figure}{Figura}{Figuras}
   \Crefname{figure}{Figura}{Figuras}
@@ -220,11 +232,27 @@
     numbersep  = 8pt,
   }
 
-  % Atalhos de linguagem (geram ambientes vhdlcode, verilogcode, pythoncode, ccode)
+  % Atalhos de linguagem (geram ambientes vhdlcode, verilogcode, pythoncode,
+  % ccode, bashcode, makecode, gascode, objdumpcode)
   \newminted{vhdl}{}
   \newminted{verilog}{}
   \newminted{python}{}
   \newminted{c}{}
+  \newminted{bash}{}
+  \newminted{make}{}
+  % assembly AT&T do GNU as. A saida de gcc -S separa campos com tab, e o minted
+  % troca cada tab por espacos fixos (obeytabs e tabsize nao alinham, medido):
+  % passe o arquivo por `expand` antes.
+  \newminted{gas}{}
+  \newminted{objdump}{}   % saida de objdump -d
+
+  % Ambiente `terminal`: sessao de shell com a saida dos comandos (perf stat,
+  % time, make). O lexer console destaca so as linhas com prompt `$ `; o resto
+  % sai como texto puro. Sem numeracao, que numa saida de terminal nao aponta
+  % para nada.
+  \newminted[terminal]{console}{
+    linenos = false,
+  }
 
   % Ambiente `diff`: mostra alteracoes de codigo com a estetica de um git diff.
   % O estilo trac pinta o FUNDO das linhas alteradas (verde no +, vermelho no -),
@@ -241,9 +269,137 @@
   \BeforeBeginEnvironment{diff}{\par\addvspace{\medskipamount}}
   \AfterEndEnvironment{diff}{\par\addvspace{\medskipamount}}
 
+  \renewcommand{\listingscaption}{Código}
+  \renewcommand{\listoflistingscaption}{Lista de Códigos}
+
+  % Legenda de código ACIMA do bloco, dentro e fora de float. Fora de float
+  % (\legendacodigo) ela precisa vir antes: depois do bloco poderia cair
+  % sozinha no topo da página seguinte.
+  \floatstyle{plaintop}
+  \restylefloat{listing}
+
+  % \begin{codigolongo}{<legenda>}\label{...} <bloco minted> \end{codigolongo}
+  % Codigo com legenda FORA de float, para arquivo longo. Um minted dentro de
+  % \begin{listing} nao quebra entre paginas (o float e uma caixa inteira);
+  % fora dele quebra. \Needspace impede a legenda de ficar sozinha no pe da
+  % pagina. Tem que ser ambiente, nao macro: o caption exige \caption dentro de
+  % um grupo (senao avisa "outside box or environment" e ignora o hypcap, e o
+  % link do \cref perde a ancora). Sem o pacote caption, basta o \@captype.
+  \newenvironment{codigolongo}[1]{%
+    \par\Needspace{6\baselineskip}%
+    \@ifundefined{captionsetup}%
+      {\def\@captype{listing}}%
+      {\captionsetup{type=listing}}%
+    \caption{#1}%
+  }{\par}
+
   \ifpoli@smartrefs
     \crefname{listing}{Código}{Códigos}
     \Crefname{listing}{Código}{Códigos}
+  \fi
+\fi
+
+% --- 6b. TRECHO DE ARQUIVO ENTRE MARCAS ---  [opção: code]
+% \inputtrecho[<opções minted>]{<linguagem>}{<arquivo>}{<tag>}
+% Inclui as linhas entre dois comentários `--tag--` (a mesma marca nas duas
+% pontas), sem as linhas das marcas e com a numeração do arquivo original.
+% O próprio TeX lê o arquivo e acha as marcas por busca de texto; só então
+% chama \inputminted com firstline/lastline/firstnumber.
+% Não usar o rangeregex do minted: ele recorta por caractere (CRLF, espaço ou
+% texto depois da marca viram linha extra), não sabe a linha de origem, trata
+% a tag como regex e só existe no minted 3.
+\ExplSyntaxOn
+\ior_new:N \g__poli_trecho_ior
+\int_new:N \l__poli_trecho_linha_int
+\int_new:N \l__poli_trecho_ini_int
+\int_new:N \l__poli_trecho_fim_int
+\str_new:N \l__poli_trecho_marca_str
+\str_new:N \l__poli_trecho_texto_str
+
+\msg_new:nnn { poliusp } { trecho-sem-marca }
+  { Marcador~'--#1--'~nao~aparece~duas~vezes~em~'#2'. }
+\msg_new:nnn { poliusp } { trecho-vazio }
+  { Nao~ha~linhas~entre~as~marcas~'--#1--'~em~'#2'. }
+
+% Guarda em ini/fim as linhas da 1a e da 2a ocorrência de --tag-- (0 = não achou)
+\cs_new_protected:Npn \__poli_trecho_localizar:nn #1#2
+  {
+    \str_set:Nn \l__poli_trecho_marca_str { --#2-- }
+    \int_zero:N \l__poli_trecho_linha_int
+    \int_zero:N \l__poli_trecho_ini_int
+    \int_zero:N \l__poli_trecho_fim_int
+    \ior_open:Nn \g__poli_trecho_ior {#1}
+    \ior_str_map_inline:Nn \g__poli_trecho_ior
+      {
+        \int_incr:N \l__poli_trecho_linha_int
+        \str_set:Nn \l__poli_trecho_texto_str {##1}
+        \exp_args:NNV \str_if_in:NnT
+          \l__poli_trecho_texto_str \l__poli_trecho_marca_str
+          {
+            \int_compare:nNnTF \l__poli_trecho_ini_int = 0
+              { \int_set_eq:NN \l__poli_trecho_ini_int \l__poli_trecho_linha_int }
+              {
+                \int_set_eq:NN \l__poli_trecho_fim_int \l__poli_trecho_linha_int
+                \ior_map_break:
+              }
+          }
+      }
+    \ior_close:N \g__poli_trecho_ior
+  }
+
+% #1 opções, #2 linguagem, #3 arquivo, #4 tag
+\cs_new_protected:Npn \poli@trecho #1#2#3#4
+  {
+    \__poli_trecho_localizar:nn {#3} {#4}
+    \int_compare:nNnTF \l__poli_trecho_fim_int = 0
+      { \msg_error:nnnn { poliusp } { trecho-sem-marca } {#4} {#3} }
+      {
+        \int_compare:nNnTF
+          { \l__poli_trecho_fim_int - \l__poli_trecho_ini_int } < 2
+          { \msg_error:nnnn { poliusp } { trecho-vazio } {#4} {#3} }
+          {
+            \use:e
+              {
+                \exp_not:N \inputminted
+                  [
+                    firstline   = \int_eval:n { \l__poli_trecho_ini_int + 1 } ,
+                    lastline    = \int_eval:n { \l__poli_trecho_fim_int - 1 } ,
+                    firstnumber = \int_eval:n { \l__poli_trecho_ini_int + 1 } ,
+                    \exp_not:n {#1}
+                  ]
+                  \exp_not:n { {#2} {#3} }
+              }
+          }
+      }
+  }
+\ExplSyntaxOff
+
+\ifpoli@code
+  \NewDocumentCommand{\inputtrecho}{O{} m m m}{\poli@trecho{#1}{#2}{#3}{#4}}
+\fi
+
+% --- 6c. PSEUDOCÓDIGO (algorithm + algpseudocode) ---  [opção: pseudo]
+% Palavras-chave em inglês (padrão do pacote); legenda e \cref em português.
+\ifpoli@pseudo
+  \floatname{algorithm}{Algoritmo}
+  \renewcommand{\listalgorithmname}{Lista de Algoritmos}
+
+  % \label numa linha do algorithmic. O algorithmicx conta as linhas com
+  % \addtocounter, e o \refstepcounter que o cleveref acrescenta roda dentro
+  % da caixa do \item, onde a mudança se perde; o \label tira o tipo de
+  % \@currentcounter, que continuava "algorithm", e \cref{linha} saía
+  % "Algoritmo 1" (medido). Fixar o contador no início de cada algorithmic
+  % vale só dentro do ambiente. \theHALG@line dá uma âncora por algoritmo:
+  % sem ele, a linha 3 de qualquer algoritmo apontava para a do primeiro.
+  % \def e não \providecommand: o hyperref já define \theHALG@line.
+  \g@addto@macro\ALG@beginalgorithmic{\def\@currentcounter{ALG@line}}
+  \def\theHALG@line{\thealgorithm.\arabic{ALG@line}}
+
+  \ifpoli@smartrefs
+    \crefname{algorithm}{Algoritmo}{Algoritmos}
+    \Crefname{algorithm}{Algoritmo}{Algoritmos}
+    \crefname{ALG@line}{linha}{linhas}
+    \Crefname{ALG@line}{Linha}{Linhas}
   \fi
 \fi
 

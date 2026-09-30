@@ -6,6 +6,15 @@ Este repositório contém um template LaTeX (estilo/capa/cabeçalho) para docume
 
 O arquivo `overleaf-optin.zip` contém uma versão com recursos limitados, preparada para compilação no Overleaf. Para usar o projeto completo em uma instância self-hosted do Overleaf, entre em contato pelo e-mail [gabriel_zocal@usp.br](mailto:gabriel_zocal@usp.br).
 
+O projeto completo exige **LuaLaTeX**; XeLaTeX não funciona (o pacote
+`transparent` da capa não roda no XeTeX). Duas coisas garantem o motor certo
+mesmo que o compilador do projeto no Overleaf esteja no padrão pdfLaTeX:
+
+- o comentário `% !TeX program = lualatex` no início do `main.tex`, que o
+  Overleaf self-hosted respeita; mantenha-o nas primeiras 20 linhas;
+- o `latexmkrc`, lido tanto pelo latexmk local quanto pelo do Overleaf, que faz
+  o modo pdfLaTeX rodar `lualatex -shell-escape`.
+
 ## Opções do pacote
 
 O núcleo do `poliusp.sty` carrega só o que todo relatório usa: capa,
@@ -27,7 +36,8 @@ e `minted`:
 | `smartrefs` | `cleveref` com todos os nomes em português |
 | `floatbarriers` | `placeins` e a macro `\FloatBarrier` |
 | `tikz` | `tikz` e as bibliotecas usadas pelo template |
-| `code` | `minted` (exige `-shell-escape` e Pygments) e os ambientes `vhdlcode`, `pythoncode`, `ccode` |
+| `code` | `minted` (exige `-shell-escape` e Pygments) e os ambientes `vhdlcode`, `verilogcode`, `pythoncode`, `ccode`, `bashcode`, `makecode`, `gascode` (assembly AT&T), `objdumpcode`, `terminal` (sessão de shell) e `diff`; `\inputtrecho[opções]{linguagem}{arquivo}{tag}`, que inclui as linhas entre dois comentários `--tag--` com a numeração do arquivo; e o ambiente `codigolongo` (`\begin{codigolongo}{legenda}\label{...}` … `\end{codigolongo}`), código com legenda fora de float, para arquivo longo que precisa quebrar página. As legendas de código ficam acima do bloco |
+| `pseudo` | `algorithm` + `algpseudocode` (palavras-chave em inglês), com "Algoritmo" nas legendas e `\cref` para algoritmos e para linhas |
 | `full` | todas as opções acima |
 
 Opção desconhecida gera aviso na compilação, não erro silencioso.
@@ -37,6 +47,7 @@ O `main.tex` de exemplo usa `full`, porque demonstra todos os recursos.
 
 - `main.tex` — arquivo principal do documento (exemplo de uso do template)
 - `poliusp.sty` — pacote do template (capa, cabeçalho/rodapé, estilos)
+- `codigos/` — código-fonte lido por `\inputminted` no exemplo de `secoes/recursos.tex`
 - `fontes/` — fontes usadas pelo template
   - `copperplate_gothic_bt.ttf` (Regular)
   - `CopperplateGothicBT-Bold.otf` (Bold)

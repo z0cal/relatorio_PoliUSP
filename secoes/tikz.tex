@@ -12,14 +12,13 @@
     \node (Time) [below of=Poly] {$\mathbb{Z}_p[x]/( x^N+1 )$};
 
     \draw[->] (Poly) -- node[align=center, above, font=\footnotesize]
-                          {\color{white}$x \mapsto(\psi^{2k+1})_{k=0}^{N-1} $}
+                          {$x \mapsto(\psi^{2k+1})_{k=0}^{N-1} $}
                           (Freq);
 
-    \draw[->>] (Poly) -- node[left] {\color{white}$\pi$} (Time);
+    \draw[->>] (Poly) -- node[left] {$\pi$} (Time);
 
-    \draw[->, dashed, thick,] (Time) -- node[sloped, above] {$\mathbf{}$}
-                                       node[sloped, below] {\color{white}$\cong$}
-                                       (Freq);
+    \draw[->, dashed, thick] (Time) -- node[sloped, below] {$\cong$}
+                                      (Freq);
 \end{tikzpicture}
 \end{center}
 

@@ -46,7 +46,7 @@ end architecture;
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Lê saída do GTKWave exportada como CSV
+# CSV gravado pelo testbench: tempo, clk, q
 data = np.loadtxt("sim.csv", delimiter=",", skiprows=1)
 t, q = data[:, 0], data[:, 2]
 
@@ -56,11 +56,169 @@ plt.ylabel("Saída q")
 plt.savefig("forma_de_onda.pdf")
   \end{minted}
 \end{listing}
+% Sem a barreira, os dois floats vão para a página seguinte e o texto abaixo
+% fica logo depois dos dois-pontos acima.
+\FloatBarrier
 
 Para trechos inline use \verb|\mintinline|,
 por exemplo: \mintinline{vhdl}{if rising_edge(clk) then}.
 
 Referências: \cref{cod:contador} e \cref{cod:python}.
+
+% ----------------------------------------------------------------
+\FloatBarrier
+\subsection{Código Lido de Arquivo}
+
+Para não colar código no \verb|.tex| (e deixá-lo desatualizado em relação ao
+programa que foi de fato medido), leia o trecho direto do arquivo. Marque o
+começo e o fim com o mesmo comentário \verb|--tag--|, no próprio código:
+
+\begin{ccode}
+// --conta--
+int count_below_threshold(double array[], int n, double threshold) {
+  ...
+}
+// --conta--
+\end{ccode}
+
+e inclua com \verb|\inputtrecho[opções]{linguagem}{arquivo}{tag}|. As linhas
+das marcas não aparecem, a numeração é a do arquivo original e uma tag que não
+aparece duas vezes no arquivo gera erro de compilação:
+
+\begin{listing}[htbp]
+  \caption{Função medida, lida de \texttt{codigos/count\_below\_threshold.c}}
+  \label{cod:arquivo}
+  \inputtrecho{c}{codigos/count_below_threshold.c}{conta}
+\end{listing}
+
+Marcas aninhadas (uma tag dentro do trecho de outra) aparecem no trecho externo.
+Marca indentada funciona; para tirar a indentação do trecho, passe
+\verb|autogobble| nas opções. Para linhas fixas:
+
+\begin{minted}{latex}
+\inputminted[firstline=10, lastline=18]{c}{arquivo}
+\end{minted}
+
+% ----------------------------------------------------------------
+\FloatBarrier
+\subsection{Arquivo Longo}
+
+Um \verb|minted| dentro de \verb|listing| não quebra entre páginas: o float é
+uma caixa inteira, e o que passar de uma página estoura. Para um arquivo que
+pode ser longo, dispense o float e use o ambiente \verb|codigolongo|, com a
+legenda como argumento e o \verb|\label| logo depois. Ele não deixa a legenda
+sozinha no pé da página:
+
+\begin{codigolongo}{Programa completo, lido de \texttt{codigos/count\_below\_threshold.c}}\label{cod:completo}
+  \inputminted{c}{codigos/count_below_threshold.c}
+\end{codigolongo}
+
+Referência: \cref{cod:completo}.
+
+% ----------------------------------------------------------------
+\FloatBarrier
+\subsection{Assembly, Terminal e Makefile}
+
+Ambientes \verb|gascode| (saída de \verb|gcc -S|), \verb|objdumpcode| (saída de
+\verb|objdump -d|), \verb|makecode|, \verb|bashcode| e \verb|terminal| (sessão
+de shell, sem numeração). O \cref{cod:gas} mostra que com \verb|-O2| o
+\verb|if| do \cref{cod:arquivo} vira \verb|seta|, sem desvio condicional.
+
+O \verb|gcc -S| separa mnemônico e operandos com tab, e o \verb|minted| troca
+cada tab por um número fixo de espaços, sem respeitar as paradas de tabulação
+(\verb|obeytabs| não resolve). Converta antes com \verb|expand|:
+\verb+gcc -O2 -S f.c -o - | expand > f.s+.
+
+\begin{listing}[htbp]
+  \caption{Laço de \texttt{count\_below\_threshold} com \texttt{gcc -O2 -S}}
+  \label{cod:gas}
+  \begin{gascode}
+.L5:
+        xorl    %edx, %edx
+        comisd  (%rdi), %xmm0
+        seta    %dl
+        addq    $8, %rdi
+        addl    %edx, %eax
+        cmpq    %rdi, %rcx
+        jne     .L5
+        ret
+  \end{gascode}
+\end{listing}
+
+\begin{listing}[htbp]
+  \caption{O mesmo laço com \texttt{-O0}, via \texttt{objdump -d}: o
+    \texttt{if} é o \texttt{jbe} em \texttt{0x41}}
+  \label{cod:objdump}
+  \begin{objdumpcode}
+  3d:	comisd %xmm1,%xmm0
+  41:	jbe    47 <count_below_threshold+0x47>
+  43:	addl   $0x1,-0x8(%rbp)
+  47:	addl   $0x1,-0x4(%rbp)
+  4b:	mov    -0x4(%rbp),%eax
+  4e:	cmp    -0x1c(%rbp),%eax
+  51:	jl     20 <count_below_threshold+0x20>
+  \end{objdumpcode}
+\end{listing}
+
+\begin{listing}[htbp]
+  \caption{Regra de compilação e medição}
+  \label{cod:make}
+  \begin{makecode}
+aula1-count-below-threshold: aula1-count-below-threshold.c
+	gcc -O0 -Wall -std=c99 $< -o $@
+	perf stat ./$@ 1
+  \end{makecode}
+\end{listing}
+
+\begin{listing}[htbp]
+  \caption{Contadores de hardware do vetor ordenado}
+  \label{cod:perf}
+  \begin{terminal}
+$ perf stat -e cycles,instructions,branches,branch-misses ./aula1-count-below-threshold 1
+Input file:                   array1.dat
+Array length:                 1000000
+Below threshold:              299998
+Time (count_below_threshold): 615251 ns
+
+ Performance counter stats for './aula1-count-below-threshold 1':
+
+       404,796,629      cpu_core/cycles/u
+     1,892,450,688      cpu_core/instructions/u
+       383,493,054      cpu_core/branches/u
+         1,077,428      cpu_core/branch-misses/u
+
+       0.082248693 seconds time elapsed
+  \end{terminal}
+\end{listing}
+
+% ----------------------------------------------------------------
+\FloatBarrier
+\subsection{Pseudocódigo com \texttt{algpseudocode}}
+
+Opção \verb|pseudo|. Cada linha começa com \verb|\State| e cada bloco fecha
+com o seu \verb|\EndIf|, \verb|\EndFor|...; o \verb|[1]| numera as linhas. Um
+\verb|\label| logo depois de uma linha permite citá-la com \verb|\cref|:
+
+\begin{algorithm}[htbp]
+  \caption{Contagem de elementos abaixo do limiar}
+  \label{alg:conta}
+  \begin{algorithmic}[1]
+    \Require vetor $A[0..n-1]$, limiar $t$
+    \Ensure quantidade de elementos com $A[i] < t$
+    \Function{CountBelow}{$A, n, t$}
+      \State $c \gets 0$
+      \For{$i \gets 0$ \textbf{to} $n-1$}
+        \If{$A[i] < t$} \label{lin:if}
+          \State $c \gets c + 1$
+        \EndIf
+      \EndFor
+      \State \Return $c$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+O \cref{alg:conta} descreve o laço do \cref{cod:arquivo}; o desvio condicional
+é a \cref{lin:if}.
 
 % ----------------------------------------------------------------
 \FloatBarrier
