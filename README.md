@@ -3,8 +3,10 @@
 Este repositório contém um template LaTeX (estilo/capa/cabeçalho) para documentos da Poli-USP, com compilação via **LuaLaTeX** e fontes locais (Copperplate).
 
 A capa usa proporção áurea na composição, brasão em marca-d'água e filetes
-com losango vazado ao redor dos autores. A Copperplate fica na capa e nos
-títulos das seções principais. Veja [CAPA.md](CAPA.md) para as dimensões.
+com losango vazado ao redor dos autores. A Copperplate fica apenas na capa.
+Veja [CAPA.md](CAPA.md) para as dimensões. As seções usam Fira Sans SemiBold;
+subseções e cabeçalhos usam Fira Sans Regular. Códigos e trechos monoespaçados
+usam Roboto Mono com itálico real. O texto principal permanece em Latin Modern.
 
 ## Versão para Overleaf
 

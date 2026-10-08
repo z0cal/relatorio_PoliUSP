@@ -103,6 +103,26 @@
   BoldFont    = {CopperplateGothicBT-Bold.otf}
 ]{Copperplate Gothic BT}
 
+\setsansfont{FiraSans}[
+  Extension      = .otf,
+  UprightFont    = *-Regular,
+  ItalicFont     = *-Italic,
+  BoldFont       = *-SemiBold,
+  BoldItalicFont = *-SemiBoldItalic,
+  FontFace       = {l}{n}{Font = FiraSans-Light.otf},
+  FontFace       = {l}{it}{Font = FiraSans-LightItalic.otf},
+  Scale          = MatchLowercase,
+  Numbers        = Lining,
+]
+\setmonofont{RobotoMono}[
+  Extension      = .otf,
+  UprightFont    = *-Regular,
+  BoldFont       = *-Medium,
+  ItalicFont     = *-Italic,
+  BoldItalicFont = *-MediumItalic,
+  Scale          = MatchLowercase,
+]
+
 \ifpoli@units
   \sisetup{
     output-decimal-marker = {,},  % vírgula decimal (padrão brasileiro)
@@ -406,7 +426,7 @@
 
 % --- 7. AMBIENTES MATEMÁTICOS (amsthm) ---  [opção: math]
 \ifpoli@math
-  % No miolo, os nomes usam a fonte do texto; Copperplate fica na capa e nas seções.
+  % No miolo, os nomes usam a fonte do texto; Copperplate fica apenas na capa.
   \newtheoremstyle{poliPlain}
     {8pt}{6pt}
     {\itshape}{}
@@ -632,7 +652,7 @@
 \setlength{\alturaLogoHeader}{10mm}
 
 \newcommand{\poliHeaderTitulo}{%
-  \normalfont\color{azulpoli}\poliTituloCurtoSalvo%
+  \normalfont\sffamily\color{azulpoli}\poliTituloCurtoSalvo%
 }
 \newcommand{\poliHeaderLogo}{%
   \includegraphics[height=\alturaLogoHeader]{\poliBarraLogo}%
@@ -651,16 +671,16 @@
 \renewcommand{\contentsname}{Sumário}
 
 \titleformat{\section}
-  {\centering\fonteCapa\bfseries\Large}
+  {\centering\normalfont\sffamily\bfseries\Large}
   {\thesection}{0.8em}{}
 
 % Mesmo estilo para seções sem número (\section*)
 \titleformat{name=\section,numberless}
-  {\centering\fonteCapa\bfseries\Large}
+  {\centering\normalfont\sffamily\bfseries\Large}
   {}{0em}{}
 
 \titleformat{\subsection}
-  {\raggedright\normalfont\mdseries\large}
+  {\raggedright\normalfont\sffamily\mdseries\large}
   {\thesubsection}{0.8em}{}
 
 \titlespacing*{\section}   {0pt}{2.5ex plus 0.8ex minus 0.4ex}{1.2ex}
