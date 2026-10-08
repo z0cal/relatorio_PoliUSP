@@ -96,6 +96,7 @@
 
 % --- 2. CORES E FONTES ---
 \definecolor{azulpoli}{cmyk}{1.0, 0.72, 0.0, 0.18}
+\definecolor{azulornamento}{RGB}{102,120,146}
 \newfontfamily\fonteCapa[
   Path = ./fontes/,
   UprightFont = {copperplate_gothic_bt.ttf},
@@ -176,7 +177,7 @@
 % --- 4. BLOCO DE AUTORES ---
 \newcommand{\poliBlocoAutores}{%
   \begin{minipage}[t]{\textwidth}
-    \centering\large
+    \centering\normalsize
     \poliAutoresLista
   \end{minipage}%
 }
@@ -405,26 +406,25 @@
 
 % --- 7. AMBIENTES MATEMÁTICOS (amsthm) ---  [opção: math]
 \ifpoli@math
-  % Estilos visuais consistentes com o template
+  % No miolo, os nomes usam a fonte do texto; Copperplate fica na capa e nas seções.
   \newtheoremstyle{poliPlain}
     {8pt}{6pt}
     {\itshape}{}
-    {\color{azulpoli}\fonteCapa\bfseries}{.}
+    {\normalfont\color{azulpoli}\bfseries}{.}
     { }{}
 
   \newtheoremstyle{poliDefinition}
     {8pt}{6pt}
     {}{}
-    {\color{azulpoli}\fonteCapa\bfseries}{.}
+    {\normalfont\color{azulpoli}\bfseries}{.}
     { }{}
 
-  % A Copperplate só tem Regular e Bold: pedir \itshape aqui cairia em
-  % substituição silenciosa de fonte. A observação se distingue pelo peso
-  % (regular) contra o negrito dos dois estilos acima.
+  % A observação se distingue pelo peso regular, contra o negrito dos dois
+  % estilos acima.
   \newtheoremstyle{poliRemark}
     {6pt}{4pt}
     {}{}
-    {\color{azulpoli}\fonteCapa\mdseries}{.}
+    {\normalfont\color{azulpoli}\mdseries}{.}
     { }{}
 
   % Ambientes numerados por seção
@@ -513,18 +513,62 @@
 }
 
 % --- 9. IMAGENS ---
-\newcommand{\poliBrasao}{logospoli/logorobusto}
+\newcommand{\poliBrasao}{logospoli/brasao-harmonia}
 \newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge}
+% Filetes dos autores com losango vazado; pode ser redefinido no documento.
+\newcommand{\poliOrnamentoAutores}{%
+  \begingroup
+  \color{azulornamento}%
+  % Filetes centrados na mesma altura do losango vazado, de cerca de 1,4 mm.
+  % O desenho usa recursos nativos do LaTeX, sem depender da opção tikz.
+  \makebox[5cm][c]{\raisebox{0pt}[1.5mm][1.5mm]{%
+    \rule[-0.15pt]{2.1cm}{0.3pt}\hspace{2mm}%
+    \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.3pt}%
+    \raisebox{-0.5\height}{\rotatebox[origin=c]{45}{%
+      \fbox{\rule{0pt}{0.8mm}\rule{0.8mm}{0pt}}}}%
+    \hspace{2mm}\rule[-0.15pt]{2.1cm}{0.3pt}%
+  }}%
+  \endgroup
+}
 \newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
 \newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
 
+% Grade da capa: 1/phi = 0,618034; 1/phi^2 = 0,381966.
+% As larguras vêm da área útil; as alturas, da folha A4.
+\newlength{\poliLarguraBrasaoCapa}
+\newlength{\poliLarguraTituloCapa}
+\newlength{\poliTopoTituloCapa}
+\newlength{\poliTopoSubtituloCapa}
+\newlength{\poliTopoAutoresCapa}
+\newlength{\poliTopoDataCapa}
+\setlength{\poliLarguraBrasaoCapa}{0.618034\textwidth}
+\setlength{\poliLarguraTituloCapa}{0.381966\textwidth}
+\setlength{\poliTopoTituloCapa}{0.381966\paperheight}
+\setlength{\poliTopoSubtituloCapa}{0.618034\paperheight}
+\setlength{\poliTopoAutoresCapa}{0.763932\paperheight}
+\setlength{\poliTopoDataCapa}{0.854102\paperheight}
+
+% Coloca o centro de um bloco de texto na altura indicada a partir do topo.
+\newcommand{\poli@posicionarBlocoCapa}[2]{%
+  \AddToShipoutPictureFG*{%
+    \AtPageUpperLeft{%
+      \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-#1}){%
+        \makebox(0,0){\begin{minipage}{\textwidth}
+          \centering #2%
+        \end{minipage}}%
+      }%
+    }%
+  }%
+}
+
 \newcommand{\MarcaAguaCapa}{%
   \AddToShipoutPictureBG*{%
-    \AtPageCenter{%
-      \put(0,20mm){\makebox(0,0){%
-        {\transparent{0.1}\includegraphics[width=0.5\paperwidth,keepaspectratio]{\poliBrasao}}%
+    \AtPageUpperLeft{%
+      \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-\poliTopoTituloCapa}){%
+        \makebox(0,0){%
+          {\transparent{0.12}\includegraphics[width=\poliLarguraBrasaoCapa,keepaspectratio]{\poliBrasao}}%
+        }%
       }}%
-    }%
   }%
 }
 
@@ -548,33 +592,36 @@
       }%
     }
 
-    \vspace*{3.5cm}
-
-    \begin{minipage}[t][12cm][c]{\textwidth}
-      \centering
-      {\huge\fonteCapa\bfseries\color{azulpoli}\poliTituloSalvo\par}
-      \ifthenelse{\boolean{temSubtitulo}}{%
-        \vspace{1cm}%
-        {\Large\color{azulpoli}\textbf{\poliSubtituloSalvo}\par}%
-      }{}
-    \end{minipage}
-
-    \vspace{2cm}
-
-    \includegraphics{\poliFilet}
-    \vspace{0.2cm}
-
-    \poliBlocoAutores
-
-    \vspace{0.2cm}
-    \includegraphics{\poliFilet}
-
-    \vfill
-    \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
-      {\large\fonteCapa\color{azulpoli}\poliDisciplinaSalva\par}%
-      \vspace{0.4cm}%
+    \poli@posicionarBlocoCapa{\poliTopoTituloCapa}{%
+      \begin{minipage}{\poliLarguraTituloCapa}
+        \centering
+        % 12 pt * phi, com entrelinha de 24 pt.
+        {\fonteCapa\bfseries\fontsize{19.4164}{24}\selectfont
+          \color{azulpoli}\poliTituloSalvo\par}%
+      \end{minipage}%
     }
-    {\large\poliDataSalva\par}
+
+    \ifthenelse{\boolean{temSubtitulo}}{%
+      \poli@posicionarBlocoCapa{\poliTopoSubtituloCapa}{%
+        \normalsize\color{azulpoli}\textbf{\poliSubtituloSalvo}\par}%
+    }{}
+
+    \poli@posicionarBlocoCapa{\poliTopoAutoresCapa}{%
+      \poliOrnamentoAutores\par\vspace{0.3cm}%
+      \poliBlocoAutores\par\vspace{0.3cm}%
+      \poliOrnamentoAutores\par
+    }
+
+    \poli@posicionarBlocoCapa{\poliTopoDataCapa}{%
+      \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
+        {\normalsize\fonteCapa\color{azulpoli}\poliDisciplinaSalva\par}%
+        \vspace{0.4cm}%
+      }%
+      \normalsize\poliDataSalva\par
+    }
+
+    % As camadas acima precisam de uma página de conteúdo para serem enviadas.
+    \null\vfill
 
   \end{titlepage}
   \clearpage
@@ -585,7 +632,7 @@
 \setlength{\alturaLogoHeader}{10mm}
 
 \newcommand{\poliHeaderTitulo}{%
-  \fonteCapa\color{azulpoli}\poliTituloCurtoSalvo%
+  \normalfont\color{azulpoli}\poliTituloCurtoSalvo%
 }
 \newcommand{\poliHeaderLogo}{%
   \includegraphics[height=\alturaLogoHeader]{\poliBarraLogo}%
@@ -596,8 +643,8 @@
   \sethead[\poliHeaderLogo][][\poliHeaderTitulo]%  páginas pares
           {\poliHeaderTitulo}{}{\poliHeaderLogo}%  páginas ímpares
   \headrule
-  \setfoot[][\fonteCapa\color{azulpoli}\thepage][]%  páginas pares
-          {}{\fonteCapa\color{azulpoli}\thepage}{}%  páginas ímpares
+  \setfoot[][\normalfont\color{azulpoli}\thepage][]%  páginas pares
+          {}{\normalfont\color{azulpoli}\thepage}{}%  páginas ímpares
 }
 
 % --- 12. FORMATAÇÃO DE SEÇÕES ---
@@ -613,7 +660,7 @@
   {}{0em}{}
 
 \titleformat{\subsection}
-  {\raggedright\fonteCapa\mdseries\large}
+  {\raggedright\normalfont\mdseries\large}
   {\thesubsection}{0.8em}{}
 
 \titlespacing*{\section}   {0pt}{2.5ex plus 0.8ex minus 0.4ex}{1.2ex}
