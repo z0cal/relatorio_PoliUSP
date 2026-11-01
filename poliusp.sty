@@ -47,7 +47,7 @@
 % --- 1. PACOTES ---
 \RequirePackage{graphicx}
 \RequirePackage{eso-pic}
-\RequirePackage{transparent}
+\RequirePackage{varwidth}   % capa: coluna da assinatura
 \RequirePackage{xcolor}
 \RequirePackage{ifthen}
 \RequirePackage{fontspec}   % núcleo: a capa depende da Copperplate
@@ -262,7 +262,7 @@
 
 % --- 4. BLOCO DE AUTORES ---
 \newcommand{\poliBlocoAutores}{%
-  {\fontsize{11}{14.5}\selectfont\poliAutoresLista\par}%
+  {\fontsize{10.5}{14}\selectfont\poliAutoresLista\par}%
 }
 
 % --- 5. SUMÁRIO LOCAL DE SEÇÃO ---  [opção: localtoc]
@@ -658,93 +658,98 @@
 % --- 9. IMAGENS ---
 % Busto da Minerva sem o anel de letras, recortado e tingido de azulpoli
 % (gerado a partir de minerva-sem-letras.pdf). Pode ser redefinido no documento.
+% Na capa ele é desenhado com a altura exata do bloco de texto da assinatura.
 \newcommand{\poliBrasao}{logospoli/minerva-sem-letras-azul}
-\newcommand{\poliOpacidadeBrasao}{0.14}
 \newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
 \newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
 
 % --- 10. CAPA ---
-% A capa segue a grade do miolo: mesma mancha (126 mm, à esquerda em 42 mm),
-% texto alinhado à esquerda, Fira Sans nos títulos e XCharter no texto, e um
-% fio azulpoli pendurado na margem como os números de seção.
+% Composição mínima em três peças, dentro de uma moldura dupla fina:
 %
-%   cabeçalho  o filete amarelo do nome cai na altura do filete do cabeçalho
-%              do miolo; o departamento, em Copperplate, completa a assinatura
-%   título     última linha de base em 1/phi^2 da folha (0,382)
-%   Minerva    à direita da mancha, entre a base do título e o filete
-%   filete     em 1 - 1/(2 phi) da folha (0,691); disciplina, autores e data
-%              descem a partir dele
-\newlength{\poliCapaX}
-\newlength{\poliCapaReguaCabecalho}
-\newlength{\poliCapaBaseTitulo}
-\newlength{\poliCapaFilete}
-\newlength{\poliCapaAlturaBrasao}
-\newsavebox{\poliCaixaTitulo}
-\AtBeginDocument{%
-  \setlength{\poliCapaX}{\dimexpr(\paperwidth-\textwidth)/2\relax}%
-  \setlength{\poliCapaReguaCabecalho}{%
-    \dimexpr 1in+\voffset+\topmargin+\headheight\relax}%
-  \setlength{\poliCapaBaseTitulo}{0.381966\paperheight}%
-  \setlength{\poliCapaFilete}{0.690983\paperheight}%
-  \setlength{\poliCapaAlturaBrasao}{%
-    \dimexpr\poliCapaFilete-\poliCapaBaseTitulo-8mm\relax}%
-}
+%   moldura     filete de 0,7 pt a 12 mm da borda e outro de 0,25 pt 1,8 mm
+%               para dentro, em azulpoli
+%   assinatura  Minerva | texto, centrada, com a base na metade da folha. A
+%               Minerva tem a altura exata do bloco de texto (Escola,
+%               departamento, título e subtítulo), e um fio vertical os separa,
+%               como no logo USP|poli do cabeçalho do miolo
+%   rodapé      disciplina, autores e data, centrados, com a última linha na
+%               base da mancha do miolo
+\newlength{\poliCapaBase}
+\newlength{\poliCapaAlturaAssinatura}
+\newlength{\poliCapaLarguraAssinatura}
+\setlength{\poliCapaLarguraAssinatura}{80mm}
+\newsavebox{\poliCaixaAssinatura}
 
-% Coloca #4 com o canto #3 (ex.: lb, lt, rt) no ponto (#1, #2 a partir do topo).
+% Coloca #4 com o canto #3 (ex.: b, lb, lt) no ponto (#1, #2 a partir do topo).
 \newcommand{\poli@capaEm}[4]{%
   \AddToShipoutPictureFG*{\AtPageUpperLeft{%
-    \put(\LenToUnit{#1},\LenToUnit{-#2}){\makebox(0,0)[#3]{#4}}}}%
+    \put(\LenToUnit{\dimexpr#1\relax},\LenToUnit{-\dimexpr#2\relax}){%
+      \makebox(0,0)[#3]{#4}}}}%
 }
 
-\newcommand{\poliFonteTituloCapa}{\sffamily\bfseries\fontsize{28}{32}\selectfont}
-\newcommand{\poliFonteSubtituloCapa}{\sffamily\fontseries{l}\selectfont
-  \fontsize{15}{18}\selectfont}
+% Retângulo vazado de largura #3 e altura #4 com canto superior esquerdo em
+% (#1, #2) e filete de espessura #5.
+\newcommand{\poli@capaQuadro}[5]{%
+  \poli@capaEm{#1}{#2}{lt}{{\color{azulpoli}%
+    \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{#5}%
+    \fbox{\rule{0pt}{\dimexpr#4-2\fboxrule\relax}%
+          \rule{\dimexpr#3-2\fboxrule\relax}{0pt}}}}%
+}
+\newcommand{\poliMolduraCapa}{%
+  \poli@capaQuadro{12mm}{12mm}{\paperwidth-24mm}{\paperheight-24mm}{0.7pt}%
+  \poli@capaQuadro{13.8mm}{13.8mm}{\paperwidth-27.6mm}{\paperheight-27.6mm}{0.25pt}%
+}
 
-\newcommand{\MarcaAguaCapa}{%
-  \AddToShipoutPictureBG*{\AtPageUpperLeft{%
-    \put(\LenToUnit{\poliCapaX+\textwidth},\LenToUnit{-\poliCapaBaseTitulo}){%
-      \makebox(0,0)[rt]{{\transparent{\poliOpacidadeBrasao}%
-        \includegraphics[height=\poliCapaAlturaBrasao]{\poliBrasao}}}}}}%
+\newcommand{\poliAssinaturaCapa}{%
+  % varwidth: a coluna tem a largura natural do texto (até o limite), para a
+  % assinatura ficar centrada também com títulos curtos.
+  \sbox{\poliCaixaAssinatura}{\begin{varwidth}[b]{\poliCapaLarguraAssinatura}%
+    \raggedright
+    % \textcolor (e não \color) para o varwidth medir a largura natural.
+    {\fonteCapa\fontsize{8.5}{10.5}\selectfont
+      \textcolor{azulpoli}{Escola Politécnica da}\\
+      \textcolor{azulpoli}{Universidade de São Paulo}\par}%
+    \ifthenelse{\equal{\poliDepartamentoSalvo}{}}{}{%
+      \vspace{1.2mm}%
+      {\sffamily\fontsize{7.5}{9}\selectfont
+        \textcolor{cinzasecundario}{\poliDepartamentoSalvo}\par}}%
+    \vspace{9mm}%
+    {\sffamily\bfseries\fontsize{22}{26}\selectfont
+      \textcolor{azulpoli}{\poliTituloSalvo}\par}%
+    \ifthenelse{\boolean{temSubtitulo}}{%
+      \vspace{2.5mm}%
+      {\sffamily\fontseries{l}\selectfont\fontsize{12}{15}\selectfont
+        \poliSubtituloSalvo\par}}{}%
+  \end{varwidth}}%
+  \setlength{\poliCapaAlturaAssinatura}{%
+    \dimexpr\ht\poliCaixaAssinatura+\dp\poliCaixaAssinatura\relax}%
+  \raisebox{-\dp\poliCaixaAssinatura}{%
+    \includegraphics[height=\poliCapaAlturaAssinatura]{\poliBrasao}}%
+  \hspace{6mm}%
+  {\color{azulornamento}\raisebox{-\dp\poliCaixaAssinatura}{%
+    \rule{0.4pt}{\poliCapaAlturaAssinatura}}}%
+  \hspace{6mm}%
+  \usebox{\poliCaixaAssinatura}%
+}
+
+\newcommand{\poliRodapeCapa}{%
+  \parbox[b]{\textwidth}{\centering
+    \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
+      {\sffamily\fontsize{8.5}{10.5}\selectfont\color{azulpoli}%
+        \poliDisciplinaSalva\par}\vspace{3mm}}%
+    \poliBlocoAutores\vspace{5mm}%
+    {\sffamily\fontsize{8.5}{10}\selectfont\color{cinzasecundario}%
+      \poliDataSalva\par}}%
 }
 
 \renewcommand{\maketitle}{%
+  \setlength{\poliCapaBase}{%
+    \dimexpr 1in+\voffset+\topmargin+\headheight+\headsep+\textheight\relax}%
   \begin{titlepage}
     \microtypesetup{activate=false}%
-    \MarcaAguaCapa
-
-    % Cabeçalho
-    \poli@capaEm{\poliCapaX}{\poliCapaReguaCabecalho}{lb}{%
-      \includegraphics[width=\textwidth]{\poliImgCabecalho}}%
-    \poli@capaEm{\poliCapaX}{\dimexpr\poliCapaReguaCabecalho+5mm\relax}{lb}{%
-      {\fonteCapa\fontsize{8}{10}\selectfont\color{cinzasecundario}%
-        \poliDepartamentoSalvo}}%
-
-    % Título, com o fio pendurado na margem
-    \sbox{\poliCaixaTitulo}{\parbox[b]{\textwidth}{\raggedright
-      \poliFonteTituloCapa\color{azulpoli}\poliTituloSalvo}}%
-    \poli@capaEm{\poliCapaX}{\poliCapaBaseTitulo}{lb}{%
-      \llap{\color{azulpoli}\rule[-\dp\poliCaixaTitulo]{1.6pt}{%
-        \dimexpr\ht\poliCaixaTitulo+\dp\poliCaixaTitulo\relax}\hspace{5mm}}%
-      \usebox{\poliCaixaTitulo}}%
-
-    % Subtítulo: largura 1/phi da mancha, para não invadir a Minerva
-    \ifthenelse{\boolean{temSubtitulo}}{%
-      \poli@capaEm{\poliCapaX}{\dimexpr\poliCapaBaseTitulo+12mm\relax}{lt}{%
-        \parbox[t]{0.618034\textwidth}{\raggedright
-          \poliFonteSubtituloCapa\poliSubtituloSalvo}}%
-    }{}%
-
-    % Filete, disciplina, autores e data
-    \poli@capaEm{\poliCapaX}{\poliCapaFilete}{lt}{%
-      \parbox[t]{\textwidth}{\raggedright
-        \rule{\textwidth}{0.4pt}\par\vspace{5mm}%
-        \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
-          {\sffamily\bfseries\fontsize{9}{11}\selectfont\color{azulpoli}%
-            \poliDisciplinaSalva\par}\vspace{3mm}}%
-        \poliBlocoAutores\vspace{4mm}%
-        {\sffamily\fontsize{9}{11}\selectfont\color{cinzasecundario}%
-          \poliDataSalva\par}}}%
-
+    \poliMolduraCapa
+    \poli@capaEm{0.5\paperwidth}{0.5\paperheight}{b}{\poliAssinaturaCapa}%
+    \poli@capaEm{0.5\paperwidth}{\poliCapaBase}{b}{\poliRodapeCapa}%
     % As camadas acima precisam de uma página de conteúdo para serem enviadas.
     \null
   \end{titlepage}
