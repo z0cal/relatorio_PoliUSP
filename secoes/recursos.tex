@@ -119,9 +119,10 @@ Referência: \cref{cod:completo}.
 \FloatBarrier
 \subsection{Assembly, Terminal e Makefile}
 
-Ambientes \verb|gascode| (saída de \verb|gcc -S|), \verb|objdumpcode| (saída de
-\verb|objdump -d|), \verb|makecode|, \verb|bashcode| e \verb|terminal| (sessão
-de shell, sem numeração). O \cref{cod:gas} mostra que com \verb|-O2| o
+Para assembly, use \verb|gascode| (saída de \verb|gcc -S|) ou
+\verb|objdumpcode| (saída de \verb|objdump -d|). Para os outros formatos, use
+\verb|makecode|, \verb|bashcode| e \verb|terminal| (sessão de shell, sem
+numeração). O \cref{cod:gas} mostra que com \verb|-O2| o
 \verb|if| do \cref{cod:arquivo} vira \verb|seta|, sem desvio condicional.
 
 O \verb|gcc -S| separa mnemônico e operandos com tab, e o \verb|minted| troca
