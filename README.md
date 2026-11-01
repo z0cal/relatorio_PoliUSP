@@ -2,14 +2,13 @@
 
 Este repositório contém um template LaTeX (estilo/capa/cabeçalho) para documentos da Poli-USP, com compilação via **LuaLaTeX** e fontes locais (Copperplate).
 
-A capa usa proporção áurea na composição, o busto da Minerva em marca-d'água e
-filetes ao redor dos autores (a Minerva em miniatura no de cima, losango vazado
-no de baixo). O fim do documento leva um colofão com a Minerva entre filetes;
-desative com `\renewcommand{\poliColofao}{}` no preâmbulo. A Copperplate fica
-apenas na capa.
-Veja [CAPA.md](CAPA.md) para as dimensões. As seções usam Fira Sans SemiBold;
-subseções e cabeçalhos usam Fira Sans Regular. Códigos e trechos monoespaçados
-usam Roboto Mono com itálico real. O texto principal permanece em Latin Modern.
+A capa segue a grade do miolo: mesma mancha de 126 mm, texto alinhado à
+esquerda e um fio azul pendurado na margem ao lado do título, como os números
+de seção. O título fica na linha de 0,382 da folha; o busto da Minerva, em
+marca-d'água à direita, ocupa o espaço entre o título e o filete dos autores.
+A Copperplate fica só na assinatura da Escola e do departamento. Os títulos
+usam Fira Sans (SemiBold nas seções, Regular nas subseções e cabeçalhos), o
+texto usa XCharter e os códigos usam Roboto Mono com itálico real.
 
 ## Versão para Overleaf
 

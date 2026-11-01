@@ -133,18 +133,6 @@
   ]
 \fi
 
-% A capa conserva a fonte serifada e os tamanhos da composição aprovada.
-\newfontfamily\poliFonteTextoCapa[
-  Extension      = .otf,
-  Ligatures      = TeX,
-  UprightFont    = lmroman12-regular,
-  BoldFont       = lmroman12-bold,
-  ItalicFont     = lmroman12-italic,
-  BoldItalicFont = lmroman10-bolditalic,
-]{Latin Modern Roman}
-\newcommand{\poliTextoCapa}{%
-  \poliFonteTextoCapa\fontsize{12}{14.5}\selectfont%
-}
 \newfontfamily\fonteCapa[
   Path = ./fontes/,
   UprightFont = {copperplate_gothic_bt.ttf},
@@ -274,10 +262,7 @@
 
 % --- 4. BLOCO DE AUTORES ---
 \newcommand{\poliBlocoAutores}{%
-  \begin{minipage}[t]{\textwidth}
-    \centering\poliTextoCapa
-    \poliAutoresLista
-  \end{minipage}%
+  {\fontsize{11}{14.5}\selectfont\poliAutoresLista\par}%
 }
 
 % --- 5. SUMÁRIO LOCAL DE SEÇÃO ---  [opção: localtoc]
@@ -674,154 +659,94 @@
 % Busto da Minerva sem o anel de letras, recortado e tingido de azulpoli
 % (gerado a partir de minerva-sem-letras.pdf). Pode ser redefinido no documento.
 \newcommand{\poliBrasao}{logospoli/minerva-sem-letras-azul}
-% O mesmo busto em azulornamento, para os ornamentos pequenos (filetes, colofão).
-\newcommand{\poliBrasaoOrnamento}{logospoli/minerva-sem-letras-ornamento}
-\newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge}
-
-% Losango vazado de cerca de 1,4 mm, centrado no eixo dos filetes.
-% O desenho usa recursos nativos do LaTeX, sem depender da opção tikz.
-\newcommand{\poliLosango}{%
-  \begingroup
-  \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.3pt}%
-  \raisebox{-0.5\height}{\rotatebox[origin=c]{45}{%
-    \fbox{\rule{0pt}{0.8mm}\rule{0.8mm}{0pt}}}}%
-  \endgroup
-}
-% Busto da Minerva em miniatura, centrado no eixo dos filetes.
-\newcommand{\poliMinervaFleurao}[1]{%
-  \raisebox{-0.5\height}{\includegraphics[height=#1]{\poliBrasaoOrnamento}}%
-}
-
-% Filete–ornamento–filete. #1: largura de cada filete; #2: ornamento central.
-\newcommand{\poliFileteComOrnamento}[2]{%
-  \begingroup
-  \color{azulornamento}%
-  \rule[-0.15pt]{#1}{0.3pt}\hspace{2mm}#2\hspace{2mm}\rule[-0.15pt]{#1}{0.3pt}%
-  \endgroup
-}
-
-% Filetes dos autores; podem ser redefinidos no documento. A Minerva fica no
-% filete de cima e o losango no de baixo: o busto abre o bloco e o losango,
-% mais leve, o fecha.
-\newcommand{\poliOrnamentoAutores}{%
-  \makebox[5cm][c]{\raisebox{0pt}[3mm][3mm]{%
-    \poliFileteComOrnamento{2.1cm}{\poliMinervaFleurao{6mm}}}}%
-}
-\newcommand{\poliOrnamentoAutoresFim}{%
-  \makebox[5cm][c]{\raisebox{0pt}[1.5mm][1.5mm]{%
-    \poliFileteComOrnamento{2.1cm}{\poliLosango}}}%
-}
-
-% Colofão: busto pequeno entre filetes, ao fim do relatório.
-% Desative com \renewcommand{\poliColofao}{} no preâmbulo.
-\newcommand{\poliColofao}{%
-  \par\penalty-200\vspace{2\baselineskip}%
-  \nopagebreak{\centering
-    \poliFileteComOrnamento{1.6cm}{\poliMinervaFleurao{9mm}}\par}%
-}
-\AtEndDocument{\poliColofao}
+\newcommand{\poliOpacidadeBrasao}{0.14}
 \newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
 \newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
 
-% Grade da capa: 1/phi = 0,618034; 1/phi^2 = 0,381966.
-% As larguras vêm da área útil; as alturas, da folha A4.
-\newlength{\poliAlturaBrasaoCapa}
-\newlength{\poliLarguraTituloCapa}
-\newlength{\poliTopoTituloCapa}
-\newlength{\poliTopoSubtituloCapa}
-\newlength{\poliTopoAutoresCapa}
-\newlength{\poliTopoDataCapa}
-% A capa tem largura própria (160 mm, = o cabeçalho de 16 cm): não segue a
-% mancha do miolo, para não mudar a composição quando a medida muda.
-\newlength{\poliLarguraCapa}
-\setlength{\poliLarguraCapa}{160mm}
-% O busto é vertical: medido pela altura, ocupa 1/phi^2 da folha (~113 mm),
-% a mesma altura em que está centrado o título.
-\setlength{\poliAlturaBrasaoCapa}{0.381966\paperheight}
-\setlength{\poliLarguraTituloCapa}{0.381966\poliLarguraCapa}
-\setlength{\poliTopoTituloCapa}{0.381966\paperheight}
-\setlength{\poliTopoSubtituloCapa}{0.618034\paperheight}
-\setlength{\poliTopoAutoresCapa}{0.763932\paperheight}
-\setlength{\poliTopoDataCapa}{0.854102\paperheight}
-
-% Coloca o centro de um bloco de texto na altura indicada a partir do topo.
-\newcommand{\poli@posicionarBlocoCapa}[2]{%
-  \AddToShipoutPictureFG*{%
-    \AtPageUpperLeft{%
-      \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-#1}){%
-        \makebox(0,0){\begin{minipage}{\poliLarguraCapa}
-          \centering #2%
-        \end{minipage}}%
-      }%
-    }%
-  }%
+% --- 10. CAPA ---
+% A capa segue a grade do miolo: mesma mancha (126 mm, à esquerda em 42 mm),
+% texto alinhado à esquerda, Fira Sans nos títulos e XCharter no texto, e um
+% fio azulpoli pendurado na margem como os números de seção.
+%
+%   cabeçalho  o filete amarelo do nome cai na altura do filete do cabeçalho
+%              do miolo; o departamento, em Copperplate, completa a assinatura
+%   título     última linha de base em 1/phi^2 da folha (0,382)
+%   Minerva    à direita da mancha, entre a base do título e o filete
+%   filete     em 1 - 1/(2 phi) da folha (0,691); disciplina, autores e data
+%              descem a partir dele
+\newlength{\poliCapaX}
+\newlength{\poliCapaReguaCabecalho}
+\newlength{\poliCapaBaseTitulo}
+\newlength{\poliCapaFilete}
+\newlength{\poliCapaAlturaBrasao}
+\newsavebox{\poliCaixaTitulo}
+\AtBeginDocument{%
+  \setlength{\poliCapaX}{\dimexpr(\paperwidth-\textwidth)/2\relax}%
+  \setlength{\poliCapaReguaCabecalho}{%
+    \dimexpr 1in+\voffset+\topmargin+\headheight\relax}%
+  \setlength{\poliCapaBaseTitulo}{0.381966\paperheight}%
+  \setlength{\poliCapaFilete}{0.690983\paperheight}%
+  \setlength{\poliCapaAlturaBrasao}{%
+    \dimexpr\poliCapaFilete-\poliCapaBaseTitulo-8mm\relax}%
 }
+
+% Coloca #4 com o canto #3 (ex.: lb, lt, rt) no ponto (#1, #2 a partir do topo).
+\newcommand{\poli@capaEm}[4]{%
+  \AddToShipoutPictureFG*{\AtPageUpperLeft{%
+    \put(\LenToUnit{#1},\LenToUnit{-#2}){\makebox(0,0)[#3]{#4}}}}%
+}
+
+\newcommand{\poliFonteTituloCapa}{\sffamily\bfseries\fontsize{28}{32}\selectfont}
+\newcommand{\poliFonteSubtituloCapa}{\sffamily\fontseries{l}\selectfont
+  \fontsize{15}{18}\selectfont}
 
 \newcommand{\MarcaAguaCapa}{%
-  \AddToShipoutPictureBG*{%
-    \AtPageUpperLeft{%
-      \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-\poliTopoTituloCapa}){%
-        \makebox(0,0){%
-          {\transparent{0.12}\includegraphics[height=\poliAlturaBrasaoCapa,keepaspectratio]{\poliBrasao}}%
-        }%
-      }}%
-  }%
+  \AddToShipoutPictureBG*{\AtPageUpperLeft{%
+    \put(\LenToUnit{\poliCapaX+\textwidth},\LenToUnit{-\poliCapaBaseTitulo}){%
+      \makebox(0,0)[rt]{{\transparent{\poliOpacidadeBrasao}%
+        \includegraphics[height=\poliCapaAlturaBrasao]{\poliBrasao}}}}}}%
 }
 
-% --- 10. CAPA ---
 \renewcommand{\maketitle}{%
   \begin{titlepage}
-    \linespread{1}\poliTextoCapa
-    \microtypesetup{activate=false}
-    \renewcommand{\arraystretch}{1}
+    \microtypesetup{activate=false}%
     \MarcaAguaCapa
-    \centering
 
-    % Cabeçalho fixo via eso-pic (não desloca o conteúdo da página)
-    \AddToShipoutPictureBG*{%
-      \AtPageUpperLeft{%
-        \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-2cm}){%
-          \makebox(0,0)[t]{%
-            \begin{tabular}{c}
-              \includegraphics[width=16cm]{\poliImgCabecalho} \\
-              \fonteCapa \poliDepartamentoSalvo
-            \end{tabular}%
-          }%
-        }%
-      }%
-    }
+    % Cabeçalho
+    \poli@capaEm{\poliCapaX}{\poliCapaReguaCabecalho}{lb}{%
+      \includegraphics[width=\textwidth]{\poliImgCabecalho}}%
+    \poli@capaEm{\poliCapaX}{\dimexpr\poliCapaReguaCabecalho+5mm\relax}{lb}{%
+      {\fonteCapa\fontsize{8}{10}\selectfont\color{cinzasecundario}%
+        \poliDepartamentoSalvo}}%
 
-    \poli@posicionarBlocoCapa{\poliTopoTituloCapa}{%
-      \begin{minipage}{\poliLarguraTituloCapa}
-        \centering
-        % 12 pt * phi, com entrelinha de 24 pt.
-        {\fonteCapa\bfseries\fontsize{19.4164}{24}\selectfont
-          \color{azulpoli}\poliTituloSalvo\par}%
-      \end{minipage}%
-    }
+    % Título, com o fio pendurado na margem
+    \sbox{\poliCaixaTitulo}{\parbox[b]{\textwidth}{\raggedright
+      \poliFonteTituloCapa\color{azulpoli}\poliTituloSalvo}}%
+    \poli@capaEm{\poliCapaX}{\poliCapaBaseTitulo}{lb}{%
+      \llap{\color{azulpoli}\rule[-\dp\poliCaixaTitulo]{1.6pt}{%
+        \dimexpr\ht\poliCaixaTitulo+\dp\poliCaixaTitulo\relax}\hspace{5mm}}%
+      \usebox{\poliCaixaTitulo}}%
 
+    % Subtítulo: largura 1/phi da mancha, para não invadir a Minerva
     \ifthenelse{\boolean{temSubtitulo}}{%
-      \poli@posicionarBlocoCapa{\poliTopoSubtituloCapa}{%
-        \poliTextoCapa\color{azulpoli}\textbf{\poliSubtituloSalvo}\par}%
-    }{}
+      \poli@capaEm{\poliCapaX}{\dimexpr\poliCapaBaseTitulo+12mm\relax}{lt}{%
+        \parbox[t]{0.618034\textwidth}{\raggedright
+          \poliFonteSubtituloCapa\poliSubtituloSalvo}}%
+    }{}%
 
-    \poli@posicionarBlocoCapa{\poliTopoAutoresCapa}{%
-      \poliOrnamentoAutores\par\vspace{0.3cm}%
-      \poliBlocoAutores\par\vspace{0.3cm}%
-      \poliOrnamentoAutoresFim\par
-    }
-
-    \poli@posicionarBlocoCapa{\poliTopoDataCapa}{%
-      \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
-        {\fontsize{12}{14.5}\selectfont\fonteCapa\color{azulpoli}\poliDisciplinaSalva\par}%
-        \vspace{0.4cm}%
-      }%
-      \poliTextoCapa\poliDataSalva\par
-    }
+    % Filete, disciplina, autores e data
+    \poli@capaEm{\poliCapaX}{\poliCapaFilete}{lt}{%
+      \parbox[t]{\textwidth}{\raggedright
+        \rule{\textwidth}{0.4pt}\par\vspace{5mm}%
+        \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
+          {\sffamily\bfseries\fontsize{9}{11}\selectfont\color{azulpoli}%
+            \poliDisciplinaSalva\par}\vspace{3mm}}%
+        \poliBlocoAutores\vspace{4mm}%
+        {\sffamily\fontsize{9}{11}\selectfont\color{cinzasecundario}%
+          \poliDataSalva\par}}}%
 
     % As camadas acima precisam de uma página de conteúdo para serem enviadas.
-    \null\vfill
-
+    \null
   \end{titlepage}
   \clearpage
 }
