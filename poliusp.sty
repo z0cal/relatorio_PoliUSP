@@ -671,29 +671,61 @@
 }
 
 % --- 9. IMAGENS ---
-\newcommand{\poliBrasao}{logospoli/minerva.pdf}
+% Busto da Minerva sem o anel de letras, recortado e tingido de azulpoli
+% (gerado a partir de minerva-sem-letras.pdf). Pode ser redefinido no documento.
+\newcommand{\poliBrasao}{logospoli/minerva-sem-letras-azul}
+% O mesmo busto em azulornamento, para os ornamentos pequenos (filetes, colofão).
+\newcommand{\poliBrasaoOrnamento}{logospoli/minerva-sem-letras-ornamento}
 \newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge}
-% Filetes dos autores com losango vazado; pode ser redefinido no documento.
-\newcommand{\poliOrnamentoAutores}{%
+
+% Losango vazado de cerca de 1,4 mm, centrado no eixo dos filetes.
+% O desenho usa recursos nativos do LaTeX, sem depender da opção tikz.
+\newcommand{\poliLosango}{%
   \begingroup
-  \color{azulornamento}%
-  % Filetes centrados na mesma altura do losango vazado, de cerca de 1,4 mm.
-  % O desenho usa recursos nativos do LaTeX, sem depender da opção tikz.
-  \makebox[5cm][c]{\raisebox{0pt}[1.5mm][1.5mm]{%
-    \rule[-0.15pt]{2.1cm}{0.3pt}\hspace{2mm}%
-    \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.3pt}%
-    \raisebox{-0.5\height}{\rotatebox[origin=c]{45}{%
-      \fbox{\rule{0pt}{0.8mm}\rule{0.8mm}{0pt}}}}%
-    \hspace{2mm}\rule[-0.15pt]{2.1cm}{0.3pt}%
-  }}%
+  \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.3pt}%
+  \raisebox{-0.5\height}{\rotatebox[origin=c]{45}{%
+    \fbox{\rule{0pt}{0.8mm}\rule{0.8mm}{0pt}}}}%
   \endgroup
 }
+% Busto da Minerva em miniatura, centrado no eixo dos filetes.
+\newcommand{\poliMinervaFleurao}[1]{%
+  \raisebox{-0.5\height}{\includegraphics[height=#1]{\poliBrasaoOrnamento}}%
+}
+
+% Filete–ornamento–filete. #1: largura de cada filete; #2: ornamento central.
+\newcommand{\poliFileteComOrnamento}[2]{%
+  \begingroup
+  \color{azulornamento}%
+  \rule[-0.15pt]{#1}{0.3pt}\hspace{2mm}#2\hspace{2mm}\rule[-0.15pt]{#1}{0.3pt}%
+  \endgroup
+}
+
+% Filetes dos autores; podem ser redefinidos no documento. A Minerva fica no
+% filete de cima e o losango no de baixo: o busto abre o bloco e o losango,
+% mais leve, o fecha.
+\newcommand{\poliOrnamentoAutores}{%
+  \makebox[5cm][c]{\raisebox{0pt}[3mm][3mm]{%
+    \poliFileteComOrnamento{2.1cm}{\poliMinervaFleurao{6mm}}}}%
+}
+\newcommand{\poliOrnamentoAutoresFim}{%
+  \makebox[5cm][c]{\raisebox{0pt}[1.5mm][1.5mm]{%
+    \poliFileteComOrnamento{2.1cm}{\poliLosango}}}%
+}
+
+% Colofão: busto pequeno entre filetes, ao fim do relatório.
+% Desative com \renewcommand{\poliColofao}{} no preâmbulo.
+\newcommand{\poliColofao}{%
+  \par\penalty-200\vspace{2\baselineskip}%
+  \nopagebreak{\centering
+    \poliFileteComOrnamento{1.6cm}{\poliMinervaFleurao{9mm}}\par}%
+}
+\AtEndDocument{\poliColofao}
 \newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
 \newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
 
 % Grade da capa: 1/phi = 0,618034; 1/phi^2 = 0,381966.
 % As larguras vêm da área útil; as alturas, da folha A4.
-\newlength{\poliLarguraBrasaoCapa}
+\newlength{\poliAlturaBrasaoCapa}
 \newlength{\poliLarguraTituloCapa}
 \newlength{\poliTopoTituloCapa}
 \newlength{\poliTopoSubtituloCapa}
@@ -703,7 +735,9 @@
 % mancha do miolo, para não mudar a composição quando a medida muda.
 \newlength{\poliLarguraCapa}
 \setlength{\poliLarguraCapa}{160mm}
-\setlength{\poliLarguraBrasaoCapa}{0.618034\poliLarguraCapa}
+% O busto é vertical: medido pela altura, ocupa 1/phi^2 da folha (~113 mm),
+% a mesma altura em que está centrado o título.
+\setlength{\poliAlturaBrasaoCapa}{0.381966\paperheight}
 \setlength{\poliLarguraTituloCapa}{0.381966\poliLarguraCapa}
 \setlength{\poliTopoTituloCapa}{0.381966\paperheight}
 \setlength{\poliTopoSubtituloCapa}{0.618034\paperheight}
@@ -728,7 +762,7 @@
     \AtPageUpperLeft{%
       \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-\poliTopoTituloCapa}){%
         \makebox(0,0){%
-          {\transparent{0.12}\includegraphics[width=\poliLarguraBrasaoCapa,keepaspectratio]{\poliBrasao}}%
+          {\transparent{0.12}\includegraphics[height=\poliAlturaBrasaoCapa,keepaspectratio]{\poliBrasao}}%
         }%
       }}%
   }%
@@ -774,7 +808,7 @@
     \poli@posicionarBlocoCapa{\poliTopoAutoresCapa}{%
       \poliOrnamentoAutores\par\vspace{0.3cm}%
       \poliBlocoAutores\par\vspace{0.3cm}%
-      \poliOrnamentoAutores\par
+      \poliOrnamentoAutoresFim\par
     }
 
     \poli@posicionarBlocoCapa{\poliTopoDataCapa}{%
