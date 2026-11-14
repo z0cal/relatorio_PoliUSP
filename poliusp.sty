@@ -17,6 +17,7 @@
 \newif\ifpoli@tikz
 \newif\ifpoli@code
 \newif\ifpoli@pseudo
+\newif\ifpoli@codefrozen
 
 \DeclareOption{math}{\poli@mathtrue}
 \DeclareOption{units}{\poli@unitstrue}
@@ -27,6 +28,11 @@
 \DeclareOption{tikz}{\poli@tikztrue}
 \DeclareOption{code}{\poli@codetrue}
 \DeclareOption{pseudo}{\poli@pseudotrue}
+% codefrozen: como `code`, mas o minted usa só o cache já gerado e não chama o
+% latexminted (medido: ~2 s a menos por passada no exemplo). Compile uma vez com
+% `code` para gerar o cache; depois disso, alterar um bloco de código dá erro
+% "Cannot highlight code (frozencache=true)" até voltar para `code`.
+\DeclareOption{codefrozen}{\poli@codetrue\poli@codefrozentrue}
 \DeclareOption{full}{%
   \poli@mathtrue
   \poli@unitstrue
@@ -44,7 +50,6 @@
 % --- 1. PACOTES ---
 \RequirePackage{graphicx}
 \RequirePackage{eso-pic}
-\RequirePackage{transparent}
 \RequirePackage{xcolor}
 \RequirePackage{ifthen}
 \RequirePackage{fontspec}   % núcleo: a capa depende da Copperplate
@@ -63,6 +68,9 @@
   \RequirePackage[section]{placeins}
 \fi
 \ifpoli@code
+  \ifpoli@codefrozen
+    \PassOptionsToPackage{frozencache}{minted}
+  \fi
   \RequirePackage{minted}
   \RequirePackage{needspace}  % codigolongo
 \fi
@@ -535,45 +543,36 @@
 % --- 9. IMAGENS ---
 \newcommand{\poliBrasao}{logospoli/brasao-harmonia}
 \newcommand{\poliFilet}{logospoli/polytechnique-filetlongrouge}
-% Filetes dos autores com losango vazado; pode ser redefinido no documento.
+% Filete curto e fino da capa; pode ser redefinido no documento.
 \newcommand{\poliOrnamentoAutores}{%
-  \begingroup
-  \color{azulornamento}%
-  % Filetes centrados na mesma altura do losango vazado, de cerca de 1,4 mm.
-  % O desenho usa recursos nativos do LaTeX, sem depender da opção tikz.
-  \makebox[5cm][c]{\raisebox{0pt}[1.5mm][1.5mm]{%
-    \rule[-0.15pt]{2.1cm}{0.3pt}\hspace{2mm}%
-    \setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.3pt}%
-    \raisebox{-0.5\height}{\rotatebox[origin=c]{45}{%
-      \fbox{\rule{0pt}{0.8mm}\rule{0.8mm}{0pt}}}}%
-    \hspace{2mm}\rule[-0.15pt]{2.1cm}{0.3pt}%
-  }}%
-  \endgroup
+  {\color{azulornamento}\rule{30mm}{0.45pt}}%
 }
 \newcommand{\poliBarraLogo}{logospoli/usp+polibarra}
 \newcommand{\poliImgCabecalho}{logospoli/nome-colorido}
 
-% Grade da capa: 1/phi = 0,618034; 1/phi^2 = 0,381966.
-% As larguras vêm da área útil; as alturas, da folha A4.
+% Grade da capa: eixo central, brasão como emblema acima do título.
+% Alturas medidas do topo da folha até o topo de cada bloco.
 \newlength{\poliLarguraBrasaoCapa}
 \newlength{\poliLarguraTituloCapa}
+\newlength{\poliTopoBrasaoCapa}
 \newlength{\poliTopoTituloCapa}
 \newlength{\poliTopoSubtituloCapa}
 \newlength{\poliTopoAutoresCapa}
 \newlength{\poliTopoDataCapa}
-\setlength{\poliLarguraBrasaoCapa}{0.618034\textwidth}
-\setlength{\poliLarguraTituloCapa}{0.381966\textwidth}
-\setlength{\poliTopoTituloCapa}{0.381966\paperheight}
-\setlength{\poliTopoSubtituloCapa}{0.618034\paperheight}
-\setlength{\poliTopoAutoresCapa}{0.763932\paperheight}
-\setlength{\poliTopoDataCapa}{0.854102\paperheight}
+\setlength{\poliLarguraBrasaoCapa}{40mm}
+\setlength{\poliLarguraTituloCapa}{\textwidth}
+\setlength{\poliTopoBrasaoCapa}{54mm}
+\setlength{\poliTopoTituloCapa}{108mm}
+\setlength{\poliTopoSubtituloCapa}{10mm}
+\setlength{\poliTopoAutoresCapa}{214mm}
+\setlength{\poliTopoDataCapa}{254mm}
 
-% Coloca o centro de um bloco de texto na altura indicada a partir do topo.
+% Posiciona um bloco de texto alinhado pelo topo na altura indicada a partir do topo da folha.
 \newcommand{\poli@posicionarBlocoCapa}[2]{%
   \AddToShipoutPictureFG*{%
     \AtPageUpperLeft{%
       \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-#1}){%
-        \makebox(0,0){\begin{minipage}{\textwidth}
+        \makebox(0,0)[t]{\begin{minipage}{\textwidth}
           \centering #2%
         \end{minipage}}%
       }%
@@ -581,12 +580,14 @@
   }%
 }
 
+% Brasão em cor cheia, no eixo central; nenhum texto passa por cima dele.
+% O nome \MarcaAguaCapa é mantido por compatibilidade.
 \newcommand{\MarcaAguaCapa}{%
   \AddToShipoutPictureBG*{%
     \AtPageUpperLeft{%
-      \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-\poliTopoTituloCapa}){%
-        \makebox(0,0){%
-          {\transparent{0.12}\includegraphics[width=\poliLarguraBrasaoCapa,keepaspectratio]{\poliBrasao}}%
+      \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-\poliTopoBrasaoCapa}){%
+        \makebox(0,0)[t]{%
+          \includegraphics[width=\poliLarguraBrasaoCapa,keepaspectratio]{\poliBrasao}%
         }%
       }}%
   }%
@@ -598,46 +599,61 @@
     \MarcaAguaCapa
     \centering
 
-    % Cabeçalho fixo via eso-pic (não desloca o conteúdo da página)
+    % 1. Instituição no topo (margem de 24 mm acompanhando as laterais de 25 mm)
     \AddToShipoutPictureBG*{%
       \AtPageUpperLeft{%
-        \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-2cm}){%
+        \put(\LenToUnit{0.5\paperwidth},\LenToUnit{-24mm}){%
           \makebox(0,0)[t]{%
-            \begin{tabular}{c}
-              \includegraphics[width=16cm]{\poliImgCabecalho} \\
-              \fonteCapa \poliDepartamentoSalvo
-            \end{tabular}%
+            \begin{minipage}{\textwidth}
+              \centering
+              \includegraphics[width=\textwidth]{\poliImgCabecalho}\par
+              \vspace{2.5mm}%
+              {\fonteCapa\fontsize{11}{14}\selectfont
+                \addfontfeatures{Ligatures=TeX,LetterSpace=5.0}%
+                \color{azulornamento}\poliDepartamentoSalvo\par}%
+            \end{minipage}%
           }%
         }%
       }%
     }
 
+    % 2. Obra (título e subtítulo unidos por filete curto e fino)
     \poli@posicionarBlocoCapa{\poliTopoTituloCapa}{%
       \begin{minipage}{\poliLarguraTituloCapa}
         \centering
-        % 12 pt * phi, com entrelinha de 24 pt.
-        {\fonteCapa\bfseries\fontsize{19.4164}{24}\selectfont
+        {\fonteCapa\bfseries\fontsize{30}{35}\selectfont
+          \addfontfeatures{Ligatures=TeX,LetterSpace=3.5}%
           \color{azulpoli}\poliTituloSalvo\par}%
+        \ifthenelse{\boolean{temSubtitulo}}{%
+          \nointerlineskip\vspace{6.0mm}%
+          \hbox to \linewidth{\hss\poliOrnamentoAutores\hss}%
+          \nointerlineskip\vspace{4.2mm}%
+          {\fonteCapa\fontsize{13.5}{18}\selectfont
+            \addfontfeatures{Ligatures=TeX,LetterSpace=5.0}%
+            \color{azulornamento}\poliSubtituloSalvo\par}%
+        }{}%
       \end{minipage}%
     }
 
-    \ifthenelse{\boolean{temSubtitulo}}{%
-      \poli@posicionarBlocoCapa{\poliTopoSubtituloCapa}{%
-        \normalsize\color{azulpoli}\textbf{\poliSubtituloSalvo}\par}%
-    }{}
-
+    % 3. Autoria no terço inferior
     \poli@posicionarBlocoCapa{\poliTopoAutoresCapa}{%
-      \poliOrnamentoAutores\par\vspace{0.3cm}%
-      \poliBlocoAutores\par\vspace{0.3cm}%
-      \poliOrnamentoAutores\par
+      {\renewcommand{\normalsize}{\fontsize{11}{17}\selectfont}%
+       \normalfont\color{black!85}\poliBlocoAutores\par}%
     }
 
+    % 4. Disciplina e data no pé
     \poli@posicionarBlocoCapa{\poliTopoDataCapa}{%
-      \ifthenelse{\equal{\poliDisciplinaSalva}{}}{}{%
-        {\normalsize\fonteCapa\color{azulpoli}\poliDisciplinaSalva\par}%
-        \vspace{0.4cm}%
+      \ifthenelse{\equal{\poliDisciplinaSalva}{}}{%
+        \vspace*{6.5mm}%
+      }{%
+        {\fonteCapa\fontsize{11}{14.5}\selectfont
+          \addfontfeatures{Ligatures=TeX,LetterSpace=5.0}%
+          \color{azulornamento}\poliDisciplinaSalva\par}%
+        \vspace{2.0mm}%
       }%
-      \normalsize\poliDataSalva\par
+      {\fonteCapa\fontsize{11}{14.5}\selectfont
+        \addfontfeatures{Ligatures=TeX,LetterSpace=5.0}%
+        \color{black!75}\poliDataSalva\par}%
     }
 
     % As camadas acima precisam de uma página de conteúdo para serem enviadas.

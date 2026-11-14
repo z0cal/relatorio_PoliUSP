@@ -2,8 +2,9 @@
 
 Este repositório contém um template LaTeX (estilo/capa/cabeçalho) para documentos da Poli-USP, com compilação via **LuaLaTeX** e fontes locais (Copperplate).
 
-A capa usa proporção áurea na composição, brasão em marca-d'água e filetes
-com losango vazado ao redor dos autores. A Copperplate fica apenas na capa.
+A capa tem eixo central: o brasão aparece como emblema acima do título, e o
+subtítulo fica logo abaixo dele, separado por um filete curto. A Copperplate
+fica apenas na capa.
 Veja [CAPA.md](CAPA.md) para as dimensões. As seções usam Fira Sans SemiBold;
 subseções e cabeçalhos usam Fira Sans Regular. Códigos e trechos monoespaçados
 usam Roboto Mono com itálico real. O texto principal permanece em Latin Modern.
@@ -12,8 +13,8 @@ usam Roboto Mono com itálico real. O texto principal permanece em Latin Modern.
 
 O arquivo `overleaf-optin.zip` contém uma versão com recursos limitados, preparada para compilação no Overleaf. Para usar o projeto completo em uma instância self-hosted do Overleaf, entre em contato pelo e-mail [gabriel_zocal@usp.br](mailto:gabriel_zocal@usp.br).
 
-O projeto completo exige **LuaLaTeX**; XeLaTeX não funciona (o pacote
-`transparent` da capa não roda no XeTeX). Duas coisas garantem o motor certo
+O projeto completo exige **LuaLaTeX**; XeLaTeX não é suportado nem testado.
+Duas coisas garantem o motor certo
 mesmo que o compilador do projeto no Overleaf esteja no padrão pdfLaTeX:
 
 - o comentário `% !TeX program = lualatex` no início do `main.tex`, que o
@@ -44,7 +45,8 @@ e `minted`:
 | `tikz` | `tikz` e as bibliotecas usadas pelo template |
 | `code` | `minted` (exige `-shell-escape` e Pygments) e os ambientes `vhdlcode`, `verilogcode`, `pythoncode`, `ccode`, `bashcode`, `makecode`, `gascode` (assembly AT&T), `objdumpcode`, `terminal` (sessão de shell) e `diff`; `\inputtrecho[opções]{linguagem}{arquivo}{tag}`, que inclui as linhas entre dois comentários `--tag--` com a numeração do arquivo; e o ambiente `codigolongo` (`\begin{codigolongo}{legenda}\label{...}` … `\end{codigolongo}`), código com legenda fora de float, para arquivo longo que precisa quebrar página. As legendas de código ficam acima do bloco |
 | `pseudo` | `algorithm` + `algpseudocode` (palavras-chave em inglês), com "Algoritmo" nas legendas e `\cref` para algoritmos e para linhas |
-| `full` | todas as opções acima |
+| `codefrozen` | o mesmo que `code`, mas com o cache do `minted` congelado: não chama o `latexminted`, o que economiza cerca de 2 s por passada no exemplo. Compile uma vez com `code` antes; enquanto estiver ativa, alterar um bloco de código gera erro, e basta voltar para `code`. Só para compilação local: o Overleaf apaga o cache ao recompilar do zero ou após alguns dias sem uso, e aí a opção falha |
+| `full` | todas as opções acima, exceto `codefrozen` |
 
 Opção desconhecida gera aviso na compilação, não erro silencioso.
 O `main.tex` de exemplo usa `full`, porque demonstra todos os recursos.
